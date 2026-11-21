@@ -1,0 +1,904 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Simulador OutSystems Associate Reactive Developer</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --surface: #1e293b;
+      --surface-2: #273449;
+      --border: #334155;
+      --text: #f1f5f9;
+      --muted: #94a3b8;
+      --brand: #e1251b;
+      --brand-hover: #c51d14;
+      --ok: #10b981;
+      --ok-bg: rgba(16, 185, 129, 0.14);
+      --bad: #ef4444;
+      --bad-bg: rgba(239, 68, 68, 0.14);
+      --warn: #f59e0b;
+      --warn-bg: rgba(245, 158, 11, 0.14);
+      --info: #38bdf8;
+      --info-bg: rgba(56, 189, 248, 0.12);
+      --radius: 14px;
+    }
+    body.light {
+      --bg: #f8fafc;
+      --surface: #ffffff;
+      --surface-2: #f1f5f9;
+      --border: #e2e8f0;
+      --text: #0f172a;
+      --muted: #64748b;
+      --ok-bg: rgba(16, 185, 129, 0.12);
+      --bad-bg: rgba(239, 68, 68, 0.10);
+      --warn-bg: rgba(245, 158, 11, 0.12);
+      --info-bg: rgba(14, 165, 233, 0.10);
+    }
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      min-height: 100vh;
+      line-height: 1.5;
+    }
+    .container {
+      max-width: 980px;
+      margin: 0 auto;
+      padding: 24px 18px 60px;
+    }
+    header.topbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      margin-bottom: 24px;
+      flex-wrap: wrap;
+    }
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      font-weight: 800;
+      font-size: 1.2rem;
+    }
+    .logo-dot {
+      width: 34px;
+      height: 34px;
+      border-radius: 50%;
+      background: var(--brand);
+      display: grid;
+      place-items: center;
+      color: #fff;
+      font-size: 1.1rem;
+      box-shadow: 0 4px 14px rgba(225, 37, 27, 0.4);
+    }
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 16px;
+      border-radius: 10px;
+      font-weight: 600;
+      font-size: 0.92rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .btn:hover { background: var(--surface-2); border-color: var(--muted); }
+    .btn:disabled { opacity: 0.45; cursor: not-allowed; }
+    .btn-primary {
+      background: var(--brand);
+      border-color: var(--brand);
+      color: #fff;
+    }
+    .btn-primary:hover { background: var(--brand-hover); border-color: var(--brand-hover); }
+    .btn-ok {
+      background: var(--ok);
+      border-color: var(--ok);
+      color: #fff;
+    }
+    .btn-sm { padding: 6px 12px; font-size: 0.84rem; }
+
+    /* Home */
+    .hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 22px;
+    }
+    .hero h1 { margin: 0 0 8px; font-size: 1.55rem; }
+    .hero p { margin: 0; color: var(--muted); }
+    .controls-bar {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      margin-top: 18px;
+      padding-top: 18px;
+      border-top: 1px solid var(--border);
+      align-items: center;
+    }
+    .segmented {
+      display: inline-flex;
+      background: var(--surface-2);
+      padding: 4px;
+      border-radius: 10px;
+      border: 1px solid var(--border);
+    }
+    .segmented button {
+      border: none;
+      background: transparent;
+      color: var(--muted);
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 0.9rem;
+    }
+    .segmented button.active {
+      background: var(--brand);
+      color: #fff;
+    }
+    .checkbox-label {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      cursor: pointer;
+      font-size: 0.92rem;
+      color: var(--text);
+      user-select: none;
+    }
+    .deck-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 16px;
+    }
+    .deck-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      gap: 14px;
+      transition: transform 0.15s ease, border-color 0.15s ease;
+    }
+    .deck-card:hover { transform: translateY(-2px); border-color: var(--brand); }
+    .deck-card h3 { margin: 0 0 4px; font-size: 1.12rem; }
+    .deck-card p { margin: 0; color: var(--muted); font-size: 0.88rem; }
+    .deck-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      font-size: 0.84rem;
+      color: var(--muted);
+    }
+    .pill {
+      display: inline-flex;
+      align-items: center;
+      gap: 5px;
+      padding: 3px 10px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      background: var(--surface-2);
+      color: var(--text);
+      border: 1px solid var(--border);
+    }
+    .pill-ok { background: var(--ok-bg); color: var(--ok); border-color: rgba(16,185,129,0.35); }
+    .pill-bad { background: var(--bad-bg); color: var(--bad); border-color: rgba(239,68,68,0.35); }
+    .pill-warn { background: var(--warn-bg); color: var(--warn); border-color: rgba(245,158,11,0.35); }
+    .pill-info { background: var(--info-bg); color: var(--info); border-color: rgba(56,189,248,0.35); }
+
+    /* Quiz */
+    .quiz-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 12px;
+      margin-bottom: 14px;
+    }
+    .progress-track {
+      width: 100%;
+      height: 8px;
+      background: var(--surface-2);
+      border-radius: 999px;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: var(--brand);
+      transition: width 0.25s ease;
+    }
+    .q-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 24px;
+      margin-bottom: 18px;
+    }
+    .q-badges {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 14px;
+      align-items: center;
+    }
+    .q-text {
+      font-size: 1.12rem;
+      font-weight: 600;
+      margin: 0 0 14px;
+    }
+    .q-img-note {
+      background: var(--info-bg);
+      border-left: 3px solid var(--info);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-bottom: 16px;
+      color: var(--text);
+    }
+    .q-special-note {
+      background: var(--warn-bg);
+      border-left: 3px solid var(--warn);
+      padding: 10px 14px;
+      border-radius: 8px;
+      font-size: 0.88rem;
+      margin-top: 14px;
+      color: var(--text);
+    }
+    .options {
+      display: flex;
+      flex-direction: column;
+      gap: 10px;
+    }
+    .opt-btn {
+      text-align: left;
+      width: 100%;
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      padding: 14px 16px;
+      border-radius: 12px;
+      border: 2px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-size: 0.98rem;
+      cursor: pointer;
+      transition: all 0.14s ease;
+    }
+    .opt-btn:hover:not(:disabled) { border-color: var(--info); }
+    .opt-btn.selected { border-color: var(--info); background: var(--info-bg); }
+    .opt-btn.correct { border-color: var(--ok); background: var(--ok-bg); }
+    .opt-btn.wrong { border-color: var(--bad); background: var(--bad-bg); }
+    .opt-key {
+      min-width: 28px;
+      height: 28px;
+      border-radius: 8px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      display: grid;
+      place-items: center;
+      font-weight: 800;
+      font-size: 0.86rem;
+      flex-shrink: 0;
+    }
+    .opt-btn.correct .opt-key { background: var(--ok); color: #fff; border-color: var(--ok); }
+    .opt-btn.wrong .opt-key { background: var(--bad); color: #fff; border-color: var(--bad); }
+    .opt-btn.selected .opt-key { background: var(--info); color: #0f172a; border-color: var(--info); }
+
+    .nav-actions {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: 10px;
+      flex-wrap: wrap;
+      margin-bottom: 20px;
+    }
+    .q-grid {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+    }
+    .q-grid-title {
+      font-size: 0.85rem;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      justify-content: space-between;
+      flex-wrap: wrap;
+      gap: 8px;
+    }
+    .q-dots {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(38px, 1fr));
+      gap: 6px;
+    }
+    .q-dot {
+      height: 34px;
+      border-radius: 8px;
+      border: 1px solid var(--border);
+      background: var(--surface-2);
+      color: var(--text);
+      font-weight: 700;
+      font-size: 0.82rem;
+      cursor: pointer;
+      position: relative;
+    }
+    .q-dot.current { outline: 2px solid var(--brand); outline-offset: 1px; }
+    .q-dot.answered { background: var(--info-bg); border-color: var(--info); }
+    .q-dot.ok { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+    .q-dot.bad { background: var(--bad-bg); border-color: var(--bad); color: var(--bad); }
+    .q-dot.flagged::after {
+      content: '⚑';
+      position: absolute;
+      top: -5px;
+      right: -3px;
+      font-size: 0.65rem;
+      color: var(--warn);
+    }
+
+    /* Results */
+    .result-hero {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 28px;
+      text-align: center;
+      margin-bottom: 22px;
+    }
+    .score-big {
+      font-size: 3rem;
+      font-weight: 900;
+      margin: 8px 0;
+    }
+    .score-big.pass { color: var(--ok); }
+    .score-big.fail { color: var(--bad); }
+    .review-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 18px 20px;
+      margin-bottom: 14px;
+    }
+    .review-card.is-bad { border-left: 4px solid var(--bad); }
+    .review-card.is-ok { border-left: 4px solid var(--ok); }
+    .kbd-hint {
+      font-size: 0.8rem;
+      color: var(--muted);
+      text-align: center;
+      margin-top: 12px;
+    }
+    .hidden { display: none !important; }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <header class="topbar">
+      <div class="logo">
+        <div class="logo-dot">O</div>
+        <span>OutSystems Reactive · Simulador Interativo</span>
+      </div>
+      <div style="display:flex; gap:8px;">
+        <button id="themeBtn" class="btn btn-sm" title="Alternar tema">☀️ Tema</button>
+        <button id="homeBtn" class="btn btn-sm hidden">← Menu</button>
+      </div>
+    </header>
+
+    <!-- HOME VIEW -->
+    <section id="homeView">
+      <div class="hero">
+        <h1>Pratica os 4 Exames Interativamente</h1>
+        <p>Todas as 200 perguntas dos teus 4 PDFs + revisão das 33 perguntas que erraste antes. Nota mínima oficial: <strong>70%</strong>.</p>
+        <div class="controls-bar">
+          <div>
+            <span style="font-size:0.84rem; color:var(--muted); margin-right:8px;">Modo:</span>
+            <div class="segmented" id="modeSegment">
+              <button data-mode="study" class="active">📚 Modo Estudo (feedback imediato)</button>
+              <button data-mode="exam">⏱️ Modo Exame (cronómetro 2h)</button>
+            </div>
+          </div>
+          <label class="checkbox-label">
+            <input type="checkbox" id="shuffleCheck" />
+            Baralhar ordem das perguntas
+          </label>
+        </div>
+      </div>
+
+      <div class="deck-grid" id="deckGrid"></div>
+    </section>
+
+    <!-- QUIZ VIEW -->
+    <section id="quizView" class="hidden">
+      <div class="quiz-header">
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <strong id="quizTitle">Exame 1</strong>
+          <span class="pill" id="quizModePill">Modo Estudo</span>
+          <span class="pill" id="quizCounter">1 / 50</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:10px; flex-wrap:wrap;">
+          <span class="pill pill-ok hidden" id="liveScorePill">0 corretas</span>
+          <span class="pill pill-info hidden" id="timerPill">02:00:00</span>
+          <button class="btn btn-sm" id="flagBtn">⚑ Marcar</button>
+          <button class="btn btn-primary btn-sm" id="finishBtn">Submeter Exame</button>
+        </div>
+      </div>
+
+      <div class="progress-track"><div class="progress-fill" id="progressFill" style="width:0%"></div></div>
+
+      <div class="q-card">
+        <div class="q-badges" id="qBadges"></div>
+        <p class="q-text" id="qText"></p>
+        <div class="q-img-note hidden" id="qImgNote"></div>
+        <div class="options" id="optionsBox"></div>
+        <div class="q-special-note hidden" id="qSpecialNote"></div>
+      </div>
+
+      <div class="nav-actions">
+        <button class="btn" id="prevBtn">← Anterior</button>
+        <button class="btn btn-primary" id="nextBtn">Seguinte →</button>
+      </div>
+
+      <div class="q-grid">
+        <div class="q-grid-title">
+          <span>Navegação rápida</span>
+          <span id="answeredCountText">0 / 50 respondidas</span>
+        </div>
+        <div class="q-dots" id="qDots"></div>
+        <div class="kbd-hint">Atalhos: teclas <strong>A / B / C / D</strong> para responder · <strong>← / →</strong> para navegar</div>
+      </div>
+    </section>
+
+    <!-- RESULTS VIEW -->
+    <section id="resultsView" class="hidden">
+      <div class="result-hero">
+        <div id="passPill"></div>
+        <div class="score-big" id="scoreBig">0%</div>
+        <p id="scoreSub" style="color:var(--muted); margin:0 0 18px;"></p>
+        <div style="display:flex; justify-content:center; gap:10px; flex-wrap:wrap;">
+          <button class="btn btn-primary hidden" id="retryWrongBtn">🔁 Refazer Só as Erradas</button>
+          <button class="btn" id="retryDeckBtn">↻ Repetir Este Exame</button>
+          <button class="btn" id="backMenuBtn">← Voltar aos Exames</button>
+        </div>
+      </div>
+
+      <div style="display:flex; gap:8px; margin-bottom:14px; flex-wrap:wrap;" id="reviewFilters">
+        <button class="btn btn-sm btn-primary" data-filter="all">Todas</button>
+        <button class="btn btn-sm" data-filter="wrong">❌ Só Erradas</button>
+        <button class="btn btn-sm" data-filter="flagged">⚑ Só Marcadas</button>
+      </div>
+
+      <div id="reviewList"></div>
+    </section>
+  </div>
+
+  <script>
+    const ALL_QUESTIONS = [{"id":"1-1","exam":1,"num":1,"enun":"Consider the following two Entities: Contact and Group. Contacts are grouped together in groups (e. g. \"Work Contacts\", \"Family Contacts\") using these two Entities, and each contact only belongs to a single group at a time. What do we need to do to create the missing one-to-many relationship these two entities?","imgDesc":"Entidade `Contact` com Id, Name, Email, PhoneNumber, Address; Entidade `Group` com Id, Name.","opts":[{"key":"A","text":"Create a new attribute in Contact of data type Group."},{"key":"B","text":"Create a new Entity with attributes, one with data type Contact Identifier and the other with data type Group Identifier."},{"key":"C","text":"Create a new attribute in Contact of data type Group Identifier."},{"key":"D","text":"Create a new attribute in Group of data type Contact Identifier."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-2","exam":1,"num":2,"enun":"Entities and Attributes created in OutSystems are mapped to...","imgDesc":null,"opts":[{"key":"A","text":"...Classes and Attributes"},{"key":"B","text":"...Database Tables and Columns"},{"key":"C","text":"...Structures and Enumerates"},{"key":"D","text":"...Lists and Records"}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-3","exam":1,"num":3,"enun":"Regarding Static Entities and its attributes, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"It is possible to change the value of a Static Entity's attribute in runtime, by using the Update `<StaticEntity>` Entity Action."},{"key":"B","text":"It is possible to add new mandatory attributes to the Static Entity, but their values need to be specified at design time."},{"key":"C","text":"It is not possible to change the Entity's automatically created attributes."},{"key":"D","text":"It is not possible to use the Static Entity Identifier (ID attribute) in another Entity, to create a relationship."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-4","exam":1,"num":4,"enun":"Consider the following Entity and the following Excel file. What will happen when we create an action to Bootstrap data from this Excel file to the Contact Entity?","imgDesc":"Entidade `Contact` com atributos `Id`, `Name`, `Email`, `Phone`. Ficheiro Excel com colunas `Name`, `Email`, `PhoneNumber`, `Address`.","opts":[{"key":"A","text":"The Name, Email and PhoneNumber columns in the Excel file will match with the Name, Email and Phone attributes in the Contact Entity. The Address columns will be ignored."},{"key":"B","text":"The Name, Email and PhoneNumber columns in the Excel file will match with the Name, Email and Phone attributes in the Contact Entity. The Address columns will be created by the platform."},{"key":"C","text":"The Name and Email columns in the Excel file will match with the Name and Email attributes in the Contact Entity. The PhoneNumber and the Address columns will be ignored."},{"key":"D","text":"No data will be bootstrapped, because at the Entity attributes must match all the columns in the Excel file."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-5","exam":1,"num":5,"enun":"The `CreateOrUpdate<Entity>` Entity Action...","imgDesc":null,"opts":[{"key":"A","text":"... will fail with an exception if the record already exists."},{"key":"B","text":"... will update an existing record if the Id of the input record is NullIdentifier()"},{"key":"C","text":"... return the Id of the created or updated Record."},{"key":"D","text":"... returns the Record that was created or updated."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-6","exam":1,"num":6,"enun":"Consider the following data model with the Status Entity, and the Customer, Order, ShippingDetail, OrderProduct and Product Entities. Why is this model wrong?","imgDesc":null,"opts":[{"key":"A","text":"The OrderId attribute cannot be in the Status Entity since a Static Entity can only have a reference attribute to other Static Entities."},{"key":"B","text":"The Id attribute of the ShippingDetail cannot be reference the Order Entity, since Id attribute cannot be of type Entity Identifier."},{"key":"C","text":"The StatusId attribute cannot be in the Order Entity, since the Order Entity already has another reference attribute (CustomerId)."},{"key":"D","text":"The Quantity attribute cannot be in the OrderProduct Entity, since it is an Entity supporting the relationship between Order and Product."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"1-7","exam":1,"num":7,"enun":"Which attributes are returned in the output of the following Aggregate?","imgDesc":null,"opts":[{"key":"A","text":"Only the list of products."},{"key":"B","text":"The Average of the attribute price and the list of products."},{"key":"C","text":"The list of products, with the average of the attribute Price in each record."},{"key":"D","text":"Only the Average of the attribute Price."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"1-8","exam":1,"num":8,"enun":"Which attributes are returned in the output of the following Aggregate?","imgDesc":"Aggregate `GetProductsWithOrderProducts` com sources `Product` Only With `OrderProduct` e um atributo calculado `PriceWithoutVAT = Quantity * WholesalePrice`.","opts":[{"key":"A","text":"Not yet defined. You need to add an Output Structure / Entity to the Aggregate."},{"key":"B","text":"Only the Product and OrderProduct Entity and Attributes."},{"key":"C","text":"The Product and OrderProduct Entity attributes, plus a PriceWithoutVAT attribute."},{"key":"D","text":"Only the PriceWithoutVAT attribute."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-9","exam":1,"num":9,"enun":"In the image below, the UserMovieRating Entity is being dragged into an Aggregate that already has a Movie Entity. Considering this scenario, which of the following statements is correct?","imgDesc":"Aggregate `GetMovies` com `Movie`, a arrastar `UserMovieRating` para as Sources.","opts":[{"key":"A","text":"A With type of Join will be created between the Movie and UserMovieRating Entities, if the UserMovieRating MovieId attribute is non mandatory."},{"key":"B","text":"A With type of Join will be created between the Movie and UserMovieRating Entities, if the UserMovieRating MovieId attribute is mandatory."},{"key":"C","text":"A Only With type of Join will be created between the Movie and UserMovieRating Entities, if the UserMovieRating MovieId attribute is non mandatory."},{"key":"D","text":"A With or Without type of Join will be created between the Movie and UserMovieRating Entities, if the UserMovieRating MovieId attribute is non mandatory."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"1-10","exam":1,"num":10,"enun":"In the following Aggregate, we want to filter the results to only return contacts that have 'John' anywhere in their name. What is the correct expression to put in the Filter of the Aggregate to achieve the desired result?","imgDesc":"Aggregate `GetContacts` com `Contact.Name`, `JobTitle`, `Phone`, `Email`.","opts":[{"key":"A","text":"`Contact.Name like \"John\"`"},{"key":"B","text":"`Contact.Name like \"%John%\"`"},{"key":"C","text":"`Contact.Name = \"John\"`"},{"key":"D","text":"`Contact.Name = \"%John%\"`"}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-11","exam":1,"num":11,"enun":"Which of the following option is **not** possible to use to fetch data the screen is initializing?","imgDesc":null,"opts":[{"key":"A","text":"REST API methods within a Data Action flow."},{"key":"B","text":"Advanced SQL Queries defined at the Screen level."},{"key":"C","text":"Aggregates defined at the Screen level."},{"key":"D","text":"Aggregates within a Data Action flow."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-12","exam":1,"num":12,"enun":"Considering the following Aggregate, what will happen if a developer selects the Add Sort option and then chooses the `Customer.Name` attribute?","imgDesc":"Aggregate `GetOrders` com Sorting já definido em `#1 Order.Date Ascending`.","opts":[{"key":"A","text":"A second sorting criteria will be added to the Aggregate and the records with the same `Order.Date` will appear sort by `Customer.Name`."},{"key":"B","text":"The change will lead to an error in the application, because there is a sorting criteria defined that is based on an attribute of a different Entity."},{"key":"C","text":"A second sorting criteria will be added to the Aggregate and the records with the same `Customer.Name` will appear sort by `Order.Date`."},{"key":"D","text":"The sorting criteria by `Order.Date` will be replaced by the new `Customer.Name` sorting criteria."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":true},{"id":"1-13","exam":1,"num":13,"enun":"Considering the `On Parameters Changed` lifecycle event, which of the following options is **true**?","imgDesc":null,"opts":[{"key":"A","text":"The On Parameters Changed event is triggered when a variable used in a filter of an Aggregate, or an input parameter of a Data Action, changes."},{"key":"B","text":"The On Parameters Changed event are bound to Screen Widget and are triggered when new data comes from Screen Aggregates / Data Action."},{"key":"C","text":"The On Parameters Changed event is available for both Blocks and Screens."},{"key":"D","text":"The On Parameters Changed event is triggered anytime the parent of a Block changes one of Block's Input Parameters."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"1-14","exam":1,"num":14,"enun":"Considering the `On Render` lifecycle event, which of the following options is **true**?","imgDesc":null,"opts":[{"key":"A","text":"The On Render Event is the First event triggered when accessing a Screen for the first time."},{"key":"B","text":"The On Render Event is triggered before the Screen or Block are ready."},{"key":"C","text":"The On Render Event is triggered every time the underlying data of a Screen or Block changes."},{"key":"D","text":"The On Render Event is only triggered when the application is transitioning from one Screen to another."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":true},{"id":"1-15","exam":1,"num":15,"enun":"By default, how is data fetched on a Screen?","imgDesc":null,"opts":[{"key":"A","text":"The Aggregates run first, then the Data Actions."},{"key":"B","text":"The Aggregates and Data Action do not run in any particular order."},{"key":"C","text":"The Aggregates and Data Actions run following their order on the Screen (from top to bottom)."},{"key":"D","text":"The Aggregates and Data Actions run only when they are explicitly called."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-16","exam":1,"num":16,"enun":"When transitioning from the Employees Screen to the EmployeeDetail Screen, when does the application require accessing the server?","imgDesc":null,"opts":[{"key":"A","text":"For destroying the Employee Screen."},{"key":"B","text":"For destroying the EmployeeDetail Screen."},{"key":"C","text":"For triggering Screen Events."},{"key":"D","text":"For Querying the database."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"1-17","exam":1,"num":17,"enun":"Considering the scenario in the picture, which of the following option is an important step to guarantee that the cities will only be fetched when a user selects a country?","imgDesc":"Ecrã `EmployeeDetail` com dropdown `Country` e dropdown `City`, e Aggregates `GetCities`, `GetCountries`, `GetEmployeeById`.","opts":[{"key":"A","text":"Set the Fetch property of the GetCities Aggregates to Only On Demand."},{"key":"B","text":"Call the GetCities Aggregate in the OnAfterFetch event of the GetCountries Aggregates."},{"key":"C","text":"Call the GetCities Aggregate when the On Render event is triggered."},{"key":"D","text":"Call the GetCities following by the GetCities Aggregate in a Data Action."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"1-18","exam":1,"num":18,"enun":"What needs to be changed in the following Aggregate to obtain the number of *comments per Movie*, for all the movies in the database?","imgDesc":"Aggregate com `Movie` Only With `UserMovieComment` onde `UserMovieComment.MovieId = Movie.Id`.","opts":[{"key":"A","text":"Create a Group By over the Movie Id attribute and a Count over the UserMovieComment Id attribute."},{"key":"B","text":"Change the existing Join to With or Without and create Count over the UserMovieComment Id attribute."},{"key":"C","text":"Remove the Join between Movie and UserMovieComment Entities and create a Count over UserMovieComment Id attribute."},{"key":"D","text":"Change the existing Join to With or Without, create a Group By over the Movie Id attribute, and a Count over the UserMovieComment Id attribute."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"1-19","exam":1,"num":19,"enun":"Modifying the content of a Block...","imgDesc":null,"opts":[{"key":"A","text":"...requires every instance of the Block to throw an Event to the parent, to apply the changes."},{"key":"B","text":"...applies the changes to all the existing instances of that Block."},{"key":"C","text":"...only applies the changes to new instances of the Block. The existing instances remain unchanged."},{"key":"D","text":"...is not possible after it has been instantiated in another Block or Screen."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-20","exam":1,"num":20,"enun":"Consider the following Countdown Block with an `OnClickAction` Action that triggers the `Start` Event. Which of the following option is **correct**?","imgDesc":"Block `Countdown` com Event `Start` tendo a propriedade `Is Mandatory = Yes`.","opts":[{"key":"A","text":"An Event handler for the Start Event must be defined on the parent when instantiating the Countdown Block."},{"key":"B","text":"If no Event handler is defined for the Start Event, the trigger Event statement will throw an error at runtime."},{"key":"C","text":"The Event handler for the Start Event must be defined in the scope of the Countdown Block."},{"key":"D","text":"It is not necessary to create an Event handler for the Start Event, as the OnClickAction will handle the Event."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"1-21","exam":1,"num":21,"enun":"Given a reusable Block that allows the user to set a rating between 1 and 5 stars, how can the rating selected by the user be sent to the parent of the Block?","imgDesc":null,"opts":[{"key":"A","text":"Create a Local Variable in the Block for the selected rating, that can be read from the outside if you make it Public."},{"key":"B","text":"Create a Local Variable in the parent for selected rating, that can be updated by the Block."},{"key":"C","text":"Create an event in the Block, contain the selected rating as Input Parameter, that is triggered by the Block when the rating is selected."},{"key":"D","text":"Create an event in the parent to receive the selected rating as Input Parameter, that is triggered by the Block when the rating is selected."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"1-22","exam":1,"num":22,"enun":"Regarding Blocks, which of the following options is **correct**?","imgDesc":null,"opts":[{"key":"A","text":"A Block can have its own Output Parameters."},{"key":"B","text":"A Block can have Client Action defined in its scope."},{"key":"C","text":"A Block can be nested inside itself."},{"key":"D","text":"A Block can only be instantiated inside Screens."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"1-23","exam":1,"num":23,"enun":"What is needed to ensure the list is updated by InputSearch criteria?","imgDesc":null,"opts":[{"key":"A","text":"Refresh the GetEmployees Aggregate."},{"key":"B","text":"Explicitly refresh the List Widget."},{"key":"C","text":"Create a new query to filter Employees."},{"key":"D","text":"Assign the SearchKeyword with the user inserted value."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"1-24","exam":1,"num":24,"enun":"What is the main advantage of using the Form Widget?","imgDesc":null,"opts":[{"key":"A","text":"It's the only way to edit a record from an Entity."},{"key":"B","text":"Easily validate the input widgets that are inside the Form."},{"key":"C","text":"Apply a common style to all the input widgets inside the Form."},{"key":"D","text":"Save in the database all the attribute of a record at once."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-25","exam":1,"num":25,"enun":"Just considering Built-in validations, which of the following scenarios would keep a Form **Valid**?","imgDesc":null,"opts":[{"key":"A","text":"The user inserts a text on a field that expects an Integer."},{"key":"B","text":"The user does not fill a non mandatory field that is used in the logic."},{"key":"C","text":"The user inserts a date on a field that expects an Integer."},{"key":"D","text":"The user does not fill in a mandatory field."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-26","exam":1,"num":26,"enun":"Consider the next picture with a ButtonGroup widget and the Priority Entity. The ButtonGroup Variable property is set with the `PriorityId` Local Variable of type Priority Identifier. What should be set in the **Value** property of the leftmost Button Group item?","imgDesc":null,"opts":[{"key":"A","text":"`Entities.Priority.Id`"},{"key":"B","text":"`Entities.Priority.Label`"},{"key":"C","text":"`Entities.Priority`"},{"key":"D","text":"`Entities.Priority.Low`"}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"1-27","exam":1,"num":27,"enun":"Considering the following scenario, what should be the data type of the option selected in the Variable property of the dropdown?","imgDesc":null,"opts":[{"key":"A","text":"User"},{"key":"B","text":"User Identifier"},{"key":"C","text":"Text"},{"key":"D","text":"GetUsers.List"}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-28","exam":1,"num":28,"enun":"Complete the following sentence: \"By setting the Valid property of the Name input field to False...\"","imgDesc":null,"opts":[{"key":"A","text":"... the Valid property of the EmployeeForm will automatically be set to False."},{"key":"B","text":"... it is mandatory to programmatically set the Valid property of the EmployeeForm to false."},{"key":"C","text":"... the valid properties of the other input fields will also be set to False."},{"key":"D","text":"... it is mandatory to set a message in the ValidationMessage property of the Input."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":true},{"id":"1-29","exam":1,"num":29,"enun":"Which of the following options **cannot** be used **directly** in an Expression?","imgDesc":null,"opts":[{"key":"A","text":"The result of a mathematical expression."},{"key":"B","text":"The output of a Server Action."},{"key":"C","text":"Static text."},{"key":"D","text":"A numeric calculated attribute in the output of an Aggregate."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-30","exam":1,"num":30,"enun":"Which of the following steps would remove the error in the List widget represented in the picture?","imgDesc":null,"opts":[{"key":"A","text":"Specify a list in the Source property."},{"key":"B","text":"Specify a record in the Source property."},{"key":"C","text":"Specify a Structure in the Source property."},{"key":"D","text":"Specify an Entity in the Source property."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"1-31","exam":1,"num":31,"enun":"Considering the **On Click Destination** of Links and Buttons, what is the main difference between widgets?","imgDesc":null,"opts":[{"key":"A","text":"Links can have the On Click Destination set to a Screen, while Buttons cannot."},{"key":"B","text":"Links can have the On Click Destination set to an Event inside Blocks, while Buttons cannot."},{"key":"C","text":"There is no difference between the two widgets in terms of their On Click Destination."},{"key":"D","text":"Button can have the On Click Destination set to an Action, while links cannot."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-32","exam":1,"num":32,"enun":"Considering the following Server Action, which of the following option is **correct**?","imgDesc":null,"opts":[{"key":"A","text":"The Output value will always be equal to 2."},{"key":"B","text":"The Output value will either be its default value or equal to the value of IntegerInput."},{"key":"C","text":"The Output value will always be equal to the IntegerInput value."},{"key":"D","text":"If the IntegerInput has value 2, then the Output value will be equal to 2."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-33","exam":1,"num":33,"enun":"Consider the following Server Action containing a Switch, where its conditions are detailed on the connectors. The assignments are also detailed on the respective Assign tables. Which of the following options is **correct**?","imgDesc":null,"opts":[{"key":"A","text":"If the value of the Integer Input Parameter is exactly 1000, the Text Output Parameter will be \"> 1k\"."},{"key":"B","text":"At runtime, the Otherwise path will never be executed."},{"key":"C","text":"If the value of the Integer Input Parameter is higher than 1000, the Text Output Parameter will be \"> 1k\"."},{"key":"D","text":"If the value of the Integer Input Parameter is 2000, the Text Output Parameter will be \"< 1k\"."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":true},{"id":"1-34","exam":1,"num":34,"enun":"Which of the following options is a use case for a For Each?","imgDesc":null,"opts":[{"key":"A","text":"To create conditional branches."},{"key":"B","text":"To iterate over a variable of type List."},{"key":"C","text":"To bulk insert data in a Static Entity."},{"key":"D","text":"To define generic loops."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":true},{"id":"1-35","exam":1,"num":35,"enun":"Consider the Save Client Action (on the left), where the `Employee_Create` Action (on the right) is called in the logic flow. What happens if an exception is thrown during the execution of the `CreateEmployee` Entity Action?","imgDesc":null,"opts":[{"key":"A","text":"The DatabaseException flow in the Save action is executed."},{"key":"B","text":"The AllException flow in the Save action is executed."},{"key":"C","text":"The AllException flow in the Employee_Create action is executed."},{"key":"D","text":"The Exception is not handled."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"1-36","exam":1,"num":36,"enun":"Considering the `ChangeStatus` Action in the screenshot, which of the following option is **correct**?","imgDesc":null,"opts":[{"key":"A","text":"The ChangeStatus Action can be called from another module."},{"key":"B","text":"The ChangeStatus Action can be called from a Screen action."},{"key":"C","text":"The ChangeStatus Action can be called from a Server action."},{"key":"D","text":"The ChangeStatus Action can be used in an Expression on a Screen."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-37","exam":1,"num":37,"enun":"Consider the following Action, which is set as Destination of a Save button within a Form to edit information about Employees. What will happen when the user inserts an employee with 17 years old?","imgDesc":null,"opts":[{"key":"A","text":"The Employee_CreateOrUpdate Action will not run and no message will appear on the Screen."},{"key":"B","text":"The Employee_CreateOrUpdate Action will run and Success Message will appear on the Screen."},{"key":"C","text":"The Employee_CreateOrUpdate Action will run and a Database Exception will be thrown."},{"key":"D","text":"The Employee_CreateOrUpdate Action will not run and a message will appear next to the Birth Date input."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"1-38","exam":1,"num":38,"enun":"Consider the following Server action. In which scenario will the execution move from the main logic flow to the `DatabaseException` flow?","imgDesc":null,"opts":[{"key":"A","text":"Never, since the DatabaseException is not being triggered in the logic flow."},{"key":"B","text":"Whenever the CheckPermissions if conditions is evaluated to False."},{"key":"C","text":"Whenever the CreateOrUpdate Action triggers a DatabaseException."},{"key":"D","text":"Never, since the AllExceptions handler takes precedence over the DatabaseException handler."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-39","exam":1,"num":39,"enun":"Regarding **Site Properties**, which of the following statements is **true**?","imgDesc":null,"opts":[{"key":"A","text":"Site Properties cannot be changed inside a Server Action."},{"key":"B","text":"Site Properties cannot have a Record Data type."},{"key":"C","text":"Site Properties cannot be changed outside Service Studio."},{"key":"D","text":"Site Properties cannot be assigned programmatically."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-40","exam":1,"num":40,"enun":"Consider the following Roles selection of the `CinemaDetail` Screen. Which users can access this Screen?","imgDesc":null,"opts":[{"key":"A","text":"Only authenticated users."},{"key":"B","text":"Only users with both OSMDbAdmin and OSMDbUser Roles."},{"key":"C","text":"All users, regardless of authentication."},{"key":"D","text":"All users, as long as they have an application specific Role."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-41","exam":1,"num":41,"enun":"Considering the `CheckRegisteredRole` Action, which of the following option is **True**?","imgDesc":null,"opts":[{"key":"A","text":"I can use the Action in an if condition inside a Client Action."},{"key":"B","text":"I can use the Action on a Screen Data Action flow."},{"key":"C","text":"I can use the Action to hide a widget on a Screen."},{"key":"D","text":"I can use the Action on a Screen Expression."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":true},{"id":"1-42","exam":1,"num":42,"enun":"After opening the OSMDb module, the following appears on the Manage Dependencies dialog. Considering this scenario, select the **correct** option.","imgDesc":"Manage Dependencies com ícone azul de refresh ao lado do producer `OSMDb_Core`.","opts":[{"key":"A","text":"A referenced element has been changed in the OSMDb_Core module."},{"key":"B","text":"Clicking the Apply button will refresh all dependencies."},{"key":"C","text":"The OSMDb_Core module has one or more references to elements in the OSMDb module."},{"key":"D","text":"The OSMDb_Core module has been deleted from the Server."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"1-43","exam":1,"num":43,"enun":"Consider the following Action, that calculates the square root (sqrt) of a positive decimal number (N). Knowing that the function was called with `N = -1`, and the debugger is stopped at the Start node, what will happen when the developer selects the **Continue (F9)** option highlighted in the picture?","imgDesc":"Client Action `SquareRoot` com breakpoint no `Start`, `If N < 0` -> Raise `InvalidNumber` -> Handler `InvalidNumber` faz `sqrt = 0` -> `ErrorMessage` -> `End`.","opts":[{"key":"A","text":"The debugger will stop at the InvalidNumber Exception Handler flow."},{"key":"B","text":"The debugger will stop at the N < 0 if node."},{"key":"C","text":"The Action will end, with sqrt = 0, and an error message will appear on the Screen."},{"key":"D","text":"The Action will end with sqrt = -1."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-44","exam":1,"num":44,"enun":"Consider the following scenario where the developer is debugging a Client Action, defined in the scope of a Screen, and the execution is stopped at the Start node. Which of the following statements is **False**?","imgDesc":null,"opts":[{"key":"A","text":"It is possible to inspect and see the value of the Input Parameters of this Action."},{"key":"B","text":"It is possible to inspect and see the value of the GetAge Action output."},{"key":"C","text":"It is possible to inspect and see the value of the Screen widgets."},{"key":"D","text":"It is possible to inspect and see the value of the Screen's Local Variable."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-45","exam":1,"num":45,"enun":"Consider that the following Pagination widget will be used to implement the pagination functionality in a List of Employees. What should be the value of its **MaxRecords** property?","imgDesc":null,"opts":[{"key":"A","text":"The number of pages available to navigate to."},{"key":"B","text":"The total number of Employees."},{"key":"C","text":"The number of elements to be displayed per page."},{"key":"D","text":"The total number of attributes used in the List."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-46","exam":1,"num":46,"enun":"Consider a Form with a Button with the Built-in validations property set to **Yes**, and the On Click Destination set to a `SaveOnClick` Action. The `SaveOnClick` Action sends the Form data to the server, to store it in the database. How should we prevent the Form data from being sent to the server, if any of the fields contain data with an unexpected / invalid data type?","imgDesc":null,"opts":[{"key":"A","text":"Query the database, before storing the data."},{"key":"B","text":"Nothing needs to be done. Having the built-in validation is sufficient."},{"key":"C","text":"Check if the Form's Valid property is set to True, before storing the data."},{"key":"D","text":"Set the Form Valid property to False, before storing the data."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"1-47","exam":1,"num":47,"enun":"Consider the scenario in the picture with a List widget that has the output of the `GetEmployees` Aggregate as Source, and a ButtonGroup widget with three items. This ButtonGroup allows the end-user to sort the employees in the List, when one of its item is clicked. However, when a user clicks on a Button Group item, the List is not changing. What is the problem with this implementation?","imgDesc":null,"opts":[{"key":"A","text":"The developer forgot to add a Dynamic Sort to the Aggregate based on the ListSort Local Variable."},{"key":"B","text":"The developer forgot to trigger an Event on the Sort Action to execute the sort on the List."},{"key":"C","text":"The developer forgot to explicitly refresh the List widget in the Sort Action."},{"key":"D","text":"The developer forgot to assign the ListSort Local Variable to the respective option chosen in the Sort Action."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"1-48","exam":1,"num":48,"enun":"In which of the following situation, do you need to refresh the dependency of a consumer module?","imgDesc":null,"opts":[{"key":"A","text":"When the producer module does not exist in the OutSystems environment that you are connected to."},{"key":"B","text":"In all these situations you need to check the Management Dependencies."},{"key":"C","text":"When the element is no longer set as Public on the producer module."},{"key":"D","text":"When the element was deleted from the producer module."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"1-49","exam":1,"num":49,"enun":"In which of the following situation is it necessary to define a handler for a Block event?","imgDesc":null,"opts":[{"key":"A","text":"When the event has input parameters."},{"key":"B","text":"When the Block has Placeholders."},{"key":"C","text":"When the event's input parameters are all mandatory."},{"key":"D","text":"When the event is defined as mandatory."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"1-50","exam":1,"num":50,"enun":"The `After Fetch` event:","imgDesc":null,"opts":[{"key":"A","text":"Always happens after a new screen is requested."},{"key":"B","text":"Only happens after a Data action finishes data."},{"key":"C","text":"Is triggered after an Aggregate finishes fetching data."},{"key":"D","text":"Happens after fetching new data through synchronization."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-1","exam":2,"num":1,"enun":"Considering the following Entities, what is required to create a many-to-many relationship between them?","imgDesc":"Duas entidades sem relação entre si — `Order` com atributos `Id`, `Description`, `DueDate`, `CreatedOn`, `ShippedOn`, `Priority`, `AssignedTo`, `ReviewedBy`, `Status`, `RequestedBy`; e `Product` com atributos `Id`, `Name`, `VAT`, `Price`.","opts":[{"key":"A","text":"Create a third Entity that contains two attributes of types Order Identifier and Product Identifier."},{"key":"B","text":"Create a third Entity with a primary key of type Order Identifier and an attribute of type Product Identifier."},{"key":"C","text":"Create an attribute of type Order Identifier in the Product Entity and an attribute of type Product Identifier in the Order Entity."},{"key":"D","text":"Create an attribute of type Product Identifier in the Order Entity."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-2","exam":2,"num":2,"enun":"In OutSystems, an Entity Identifier ...","imgDesc":null,"opts":[{"key":"A","text":"... must have its Data Type set to Long Integer."},{"key":"B","text":"... must be set to Auto Number."},{"key":"C","text":"... can only be a single attribute."},{"key":"D","text":"... is created automatically and cannot be modified."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-3","exam":2,"num":3,"enun":"Considering the following Aggregate, what will be the attributes of the GetOrdersShippingState.List.Current record?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado — Aggregate com Group By em `ShippingState` e agregação `Count`.","opts":[{"key":"A","text":"The two aggregation attributes: ShippingState and Count."},{"key":"B","text":"The two aggregation attributes (ShippingState and Count) plus all the attributes of the Source Entity."},{"key":"C","text":"Six attributes corresponding to the six visible columns in the Aggregate: ShippingState, Count, Description, DueDate, CreatedOn and Priority."},{"key":"D","text":"The two aggregation attributes (ShippingState and Count) plus the columns used to calculate these aggregations."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"2-4","exam":2,"num":4,"enun":"Considering the following Aggregate, where the Orders are fetched with their reviewers (Employees), which of the following options is correct?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado.","opts":[{"key":"A","text":"The Aggregate only returns Orders with Priority, Status and Employee."},{"key":"B","text":"The Aggregate returns Orders without Employee and without Status."},{"key":"C","text":"The Aggregate returns Orders with Status and at least one Employee."},{"key":"D","text":"The Aggregate returns Orders with Priority and with zero or more Employees."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"2-5","exam":2,"num":5,"enun":"How would you change the following Aggregate to return the number of orders per priority?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado.","opts":[{"key":"A","text":"Change the Join between the Order and the Priority to Only With and create a Count over the Priority.Id attribute."},{"key":"B","text":"Create a Group By over the Priority.Id attribute and a Count over the Order.Id attribute."},{"key":"C","text":"Create a GroupBy over the Order.Id attribute and a Count over the Priority.Id attribute."},{"key":"D","text":"Remove the Join between the Order and the OrderStatus and create a Count over the Priority.Id attribute."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-6","exam":2,"num":6,"enun":"Considering the On Initialize lifecycle event, which of the following options is true?","imgDesc":null,"opts":[{"key":"A","text":"The On Initialize event is triggered before the Screen or Block is rendered and before fetching any data."},{"key":"B","text":"The On Initialize event is triggered after the Screen or Block has been rendered, so you can use it to manipulate its structure."},{"key":"C","text":"The On Initialize event is triggered after an Aggregate finishes fetching data and can be used to act upon the retrieved data before it’s used in the Screen."},{"key":"D","text":"The On Initialize event is triggered after the input parameter of a Block changes."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"2-7","exam":2,"num":7,"enun":"The following Screen has two Dropdowns, one to select a Country and one to select a City. The GetCountries and GetCities Aggregates provide the countries and the cities to be displayed in the respective dropdowns and are both set to be fetched At Start. Which of the following options is **not a valid step** if we want to just fetch the cities for the country selected in the respective dropdown?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado.","opts":[{"key":"A","text":"Set the Fetch property of the GetCities Aggregate to Only On Demand."},{"key":"B","text":"Refresh the GetCities Aggregate in the OnChange Action of the Country Dropdown."},{"key":"C","text":"Filter the GetCities Aggregate by the selected country."},{"key":"D","text":"Call the GetCities Aggregate in the GetCountries’ On After Fetch Event handler."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"2-8","exam":2,"num":8,"enun":"Regarding Blocks in OutSystems reactive apps, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Blocks can only be instantiated on Screens."},{"key":"B","text":"Blocks can be instantiated on Screens and other Blocks."},{"key":"C","text":"Blocks can be instantiated on Client Actions on the Screen."},{"key":"D","text":"Blocks can be instantiated on Screens and external HTML pages, using a special HTML tag."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-9","exam":2,"num":9,"enun":"Which of the following options is a valid usage of the Trigger Event node?","imgDesc":null,"opts":[{"key":"A","text":"The Trigger Event allows a Block to notify its parent (Screen or Block) that something relevant occurred in the scope of the Block."},{"key":"B","text":"The Trigger Event allows a Screen to notify its children (Blocks) that something relevant occurred in the scope of the Screen."},{"key":"C","text":"The Trigger Event allows a Block to notify its children (other Blocks) that something relevant occurred in the scope of the Block."},{"key":"D","text":"The Trigger Event allows a Screen to notify its parent (Screen or Block) that something relevant occurred in the scope of the Screen."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-10","exam":2,"num":10,"enun":"Consider a Form with a Save button with the Built-in Validations property set to **Yes**. When a user clicks on the Save button, some validations over the data submitted to the Form are automatically performed by OutSystems by default. Which validations are those?","imgDesc":null,"opts":[{"key":"A","text":"Check if the mandatory fields are filled in."},{"key":"B","text":"Check if the mandatory fields are filled in and if the non-mandatory fields, that are later used in the logic, are also filled in."},{"key":"C","text":"Check if the mandatory fields are filled in and if the data submitted by the user matches the data type expected in the input fields."},{"key":"D","text":"Check if the mandatory fields are filled in and if the data submitted by the user matches the data type of the Form’s data source."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-11","exam":2,"num":11,"enun":"In the following scenario, we are implementing the ColorsDropdown widget which will allow a user to select a color. What should be set in the **Options Text** property to make sure that the names of the colors appear in the dropdown?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado.","opts":[{"key":"A","text":"Color.Id"},{"key":"B","text":"GetColors.Color.Label"},{"key":"C","text":"Color"},{"key":"D","text":"Color.Label"}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"2-12","exam":2,"num":12,"enun":"Considering a Button in a Screen, which of the following options **cannot** be set as its On Click Destination?","imgDesc":null,"opts":[{"key":"A","text":"Screen."},{"key":"B","text":"Client Action."},{"key":"C","text":"Block."},{"key":"D","text":"External Site."}],"correct":"C","originalKey":"B","note":"Atenção: O formulário original marcava B, mas na documentação oficial da OutSystems um Button pode chamar uma Screen/Client Action, navegar para um Screen ou External Site — o que NUNCA pode ser On Click Destination de um Button é um Block (C).","prevAnswer":"D","prevWrong":true},{"id":"2-13","exam":2,"num":13,"enun":"Consider the Action called *Absolute* which returns an absolute value (abs) of a number *N* passed as Input Parameter. When does the Action return 0?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado.","opts":[{"key":"A","text":"Never."},{"key":"B","text":"When the input parameter (N) is less than zero."},{"key":"C","text":"When the input parameter (N) is zero."},{"key":"D","text":"When the input parameter (N) is greater than zero."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-14","exam":2,"num":14,"enun":"Consider the following Server Action. What happens if the *GetEmployeeById* Aggregate does not return any record?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado.","opts":[{"key":"A","text":"The DatabaseException flow is executed."},{"key":"B","text":"The RecordNotFound flow is executed."},{"key":"C","text":"No exception flow is executed."},{"key":"D","text":"The module’s global exception handler is executed."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-15","exam":2,"num":15,"enun":"Considering the Function property in Client Actions, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Setting the Function property to Yes restricts the Action to have only one Output Parameter."},{"key":"B","text":"Setting the Function property to No ensures the Action can only be used in the module where it is defined."},{"key":"C","text":"Setting the Function property to Yes is not possible, if the Action is exposed to other modules as Public."},{"key":"D","text":"Setting the Function property to No ensures the Action can only be used in Screen Expressions."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-16","exam":2,"num":16,"enun":"In an application with three roles of Anonymous, Registered and OrdersAdmin, considering that Michael is a user of the Orders application, with only the *OrdersAdmin* Role assigned to him, which of the following options is **correct**?","imgDesc":null,"opts":[{"key":"A","text":"Michael has access to Screens with the Registered Role checked."},{"key":"B","text":"Michael does not have access to Screens with the Anonymous Role checked."},{"key":"C","text":"Michael has access to Screens that have the OrdersAdmin Role checked, but not to Screens with the Registered Role checked."},{"key":"D","text":"Michael has only access to Screens that have the OrdersAdmin Role checked."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-17","exam":2,"num":17,"enun":"Which of the following options should **not** be a use case of client variables?","imgDesc":null,"opts":[{"key":"A","text":"Username."},{"key":"B","text":"Password."},{"key":"C","text":"Search filter keyword."},{"key":"D","text":"ID of a user session."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-18","exam":2,"num":18,"enun":"Consider the following Action, that calculates the square root (sqrt) of a positive decimal number (N). Knowing that the function was called with N = 0, and the debugger is stopped at the Start node, what will happen when the developer selects the **Continue (F9)** option highlighted in the picture?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado.","opts":[{"key":"A","text":"The Action will end, with sqrt = 0."},{"key":"B","text":"The Action will throw an exception and sqrt will have no value."},{"key":"C","text":"The debugger will stop in the N < 0 If node."},{"key":"D","text":"The debugger will stop at the breakpoint in the End node."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"2-19","exam":2,"num":19,"enun":"Consider the following Pagination that is associated with an already implemented Table on a Screen. There are no errors in Service Studio, but when the user selects a new page (in the pagination widget) the results do not change on the Table. What is the reason for that behavior?","imgDesc":"Referenciada no enunciado, não presente no PDF exportado.","opts":[{"key":"A","text":"The GetMovies Aggregate is not being refreshed in the OnNavigate Action."},{"key":"B","text":"The Max. Records of the Aggregate should be equal to the total number of movies in the database."},{"key":"C","text":"The Table is not being refreshed on the OnNavigate Action."},{"key":"D","text":"The Max Records property of the Pagination should be set to GetMovies.Count and the TotalCount to RecordsPerPage."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-20","exam":2,"num":20,"enun":"Consider a Screen that contains a Form to collect Customer data. The Form has a Save Button with the On Click Destination set to a SaveOnClick Action, which sends the data to the server to store it in the database. What is the best way to make sure that we do not send the data to the server when the mandatory Customer data fields have not been filled in?","imgDesc":null,"opts":[{"key":"A","text":"Just set the Built-in validations of the Save button to Yes."},{"key":"B","text":"Perform custom validations for all inputs. If one fails, set the Valid property of the Form to False."},{"key":"C","text":"Set the Built-in validations of the Save button to Yes and check if the Form’s Valid property is True."},{"key":"D","text":"Set the Built-in validations of the Save button to Yes and add an Exception Handler flow to handle invalid inputs."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-21","exam":2,"num":21,"enun":"Which of the following is not a Development Environment?","imgDesc":null,"opts":[{"key":"A","text":"Service Studio."},{"key":"B","text":"Integration Studio."},{"key":"C","text":"Service Center."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-22","exam":2,"num":22,"enun":"One of the following Tools allows you to manage the application's lifecycle across an infrastructure. Which one?","imgDesc":null,"opts":[{"key":"A","text":"Service Center."},{"key":"B","text":"LifeTime."},{"key":"C","text":"Service Studio."},{"key":"D","text":"Integration Studio."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-23","exam":2,"num":23,"enun":"During the 1-Click Publish, your application data model, code, and interface is compiled and generates .NET code, HTML, JavaScript and CSS. True or False?","imgDesc":null,"opts":[{"key":"A","text":"True."},{"key":"B","text":"False."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-24","exam":2,"num":24,"enun":"In which Service Studio layer can Screens and Blocks be found?","imgDesc":null,"opts":[{"key":"A","text":"Processes."},{"key":"B","text":"Interface."},{"key":"C","text":"Logic."},{"key":"D","text":"Data."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-25","exam":2,"num":25,"enun":"In which Service Studio layer can Entities be found?","imgDesc":null,"opts":[{"key":"A","text":"Processes."},{"key":"B","text":"Interface."},{"key":"C","text":"Logic."},{"key":"D","text":"Data."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"2-26","exam":2,"num":26,"enun":"Regarding Reactive Web Apps in OutSystems, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"A Reactive Web app is a cross-device app."},{"key":"B","text":"Data requests are executed synchronously."},{"key":"C","text":"The code generated by OutSystems results in a single-page application."},{"key":"D","text":"A developer builds the Reactive Web App in Service Studio."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":true},{"id":"2-27","exam":2,"num":27,"enun":"Regarding Mobile (Phone or Tablet) Apps in OutSystems, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"Mobile Apps can run natively on iOS and Android."},{"key":"B","text":"Mobile Apps can be distributed as a PWA."},{"key":"C","text":"Mobile Apps do not have offline capabilities."},{"key":"D","text":"The programming model of Mobile Apps is similar to Reactive Web Apps."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-28","exam":2,"num":28,"enun":"What happens when a developer publishes a module?","imgDesc":null,"opts":[{"key":"A","text":"The OutSystems platform compiles it and generates the HTML, CSS, and JavaScript."},{"key":"B","text":"The browser opens."},{"key":"C","text":"Nothing."},{"key":"D","text":"The code is uploaded but only compiled when a user accesses the application."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-29","exam":2,"num":29,"enun":"Which of the following options is false regarding Modules and Applications?","imgDesc":null,"opts":[{"key":"A","text":"An application is composed of a set of modules."},{"key":"B","text":"Modules can be of different types such as Reactive Web App, Blank or Extension."},{"key":"C","text":"Elements can be exposed and reused, but only within the same application."},{"key":"D","text":"A module that reuses an element from another module is called a Consumer."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-30","exam":2,"num":30,"enun":"Business concepts that need to be stored and accessed in our applications should be modeled as...","imgDesc":null,"opts":[{"key":"A","text":"Entities."},{"key":"B","text":"Entity diagrams."},{"key":"C","text":"Entity relationships."},{"key":"D","text":"Database tables."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-31","exam":2,"num":31,"enun":"Which of the following mappings between OutSystems and the Database is NOT correct?","imgDesc":null,"opts":[{"key":"A","text":"Entities - Tables."},{"key":"B","text":"Attributes - Column."},{"key":"C","text":"Reference attribute - Primary Key."},{"key":"D","text":"Index - Index."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-32","exam":2,"num":32,"enun":"Which of the following statements about Entities is false?","imgDesc":null,"opts":[{"key":"A","text":"Entities have attributes."},{"key":"B","text":"Entities do not require an identifier."},{"key":"C","text":"Entities are only stored in memory."},{"key":"D","text":"Entities can be created, updated, and deleted."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-33","exam":2,"num":33,"enun":"If an Entity Attribute named HouseNumber is created, what needs to be done about its Data Type?","imgDesc":null,"opts":[{"key":"A","text":"It should be set to Integer."},{"key":"B","text":"It should be set to Decimal."},{"key":"C","text":"Nothing, it will automatically be set to Identifier."},{"key":"D","text":"Nothing, it will automatically be set to Integer."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"2-34","exam":2,"num":34,"enun":"Which of the following is not an Entity Action of the Customer Entity?","imgDesc":null,"opts":[{"key":"A","text":"CreateCustomer."},{"key":"B","text":"RetrieveCustomer."},{"key":"C","text":"UpdateCustomer."},{"key":"D","text":"DeleteCustomer."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-35","exam":2,"num":35,"enun":"Which of the following is a characteristic of a Static Entity?","imgDesc":null,"opts":[{"key":"A","text":"It can’t be changed after the first publish."},{"key":"B","text":"It contains a set of Records."},{"key":"C","text":"It has two Entity Actions."},{"key":"D","text":"It can’t be extended with any new attributes."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-36","exam":2,"num":36,"enun":"Regarding the Records of a Static Entity, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"The values for all 4 default attributes must be defined."},{"key":"B","text":"Records can only be added and removed during development."},{"key":"C","text":"The record identifier is the identifier of Static Entity."},{"key":"D","text":"The Identifier attribute is required for all Static Entities."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-37","exam":2,"num":37,"enun":"Static Entities are most similar to which other programming concept?","imgDesc":null,"opts":[{"key":"A","text":"Linked lists."},{"key":"B","text":"Enumeration."},{"key":"C","text":"Hash Maps."},{"key":"D","text":"Static variables."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-38","exam":2,"num":38,"enun":"Screens can be composed of a combination of several elements called Widgets.","imgDesc":null,"opts":[{"key":"A","text":"True."},{"key":"B","text":"False."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"2-39","exam":2,"num":39,"enun":"What type of variables can be created inside a Screen?","imgDesc":null,"opts":[{"key":"A","text":"Local Variables only."},{"key":"B","text":"Input Parameters only."},{"key":"C","text":"Input Parameters and Local Variables."},{"key":"D","text":"Input Parameters, Output Parameters, and Local Variables."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-40","exam":2,"num":40,"enun":"Which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"Input Parameters allow passing data between Screens when navigating between them."},{"key":"B","text":"Local Variables from a Screen may be directly accessed from another Screen."},{"key":"C","text":"Local Variables allow temporarily storing relevant information inside a Screen."},{"key":"D","text":"When the value of a Local Variable changes the user interface reacts immediately."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-41","exam":2,"num":41,"enun":"The Expression widget...","imgDesc":null,"opts":[{"key":"A","text":"… displays only static text."},{"key":"B","text":"… displays text calculated at runtime."},{"key":"C","text":"… displays only the result of mathematical expressions."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-42","exam":2,"num":42,"enun":"Which of the following behaviors is true for Links and Buttons?","imgDesc":null,"opts":[{"key":"A","text":"Links can only navigate to Screens."},{"key":"B","text":"Buttons can only have a Screen Action as an On Click Destination."},{"key":"C","text":"Links and Buttons can either Navigate to screens or trigger Screen Actions."},{"key":"D","text":"Only Links can navigate to external URLs."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"2-43","exam":2,"num":43,"enun":"Regarding the If Widget, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"Functions can be used inside the Condition of an If."},{"key":"B","text":"More branches may be added to an If Widget."},{"key":"C","text":"Only one of the branches is shown at runtime."},{"key":"D","text":"Multiple widgets may be added inside each branch."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-44","exam":2,"num":44,"enun":"Regarding the Container widget, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"Containers allow grouping several widgets."},{"key":"B","text":"By default, containers can span from 1 column up to 12 columns."},{"key":"C","text":"Containers can be placed inside other containers."},{"key":"D","text":"All containers must have at least one widget inside."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"2-45","exam":2,"num":45,"enun":"Which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Screen Actions can call other Screen Actions from a different screen."},{"key":"B","text":"Client Actions can call Screen Actions."},{"key":"C","text":"Server Actions can call Client Actions."},{"key":"D","text":"Client Actions can call Server Actions."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"2-46","exam":2,"num":46,"enun":"Client Actions and Server Actions can have the following variables:","imgDesc":null,"opts":[{"key":"A","text":"Input and Output Parameters, but no Local variables."},{"key":"B","text":"Input Parameters and Local Variables, but no Output Parameters."},{"key":"C","text":"Input and Output Parameters, as well as Local Variables."},{"key":"D","text":"Output Parameters and Local Variables, but no Input Parameters."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"2-47","exam":2,"num":47,"enun":"The flow of an action can have...","imgDesc":null,"opts":[{"key":"A","text":"… multiple Start and End nodes."},{"key":"B","text":"… one or more Start nodes but only one End node."},{"key":"C","text":"… only one Start node but multiple End nodes."},{"key":"D","text":"… only one Start node and one End node."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"2-48","exam":2,"num":48,"enun":"Regarding the If statement, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"Both True and False branches are mandatory."},{"key":"B","text":"Only one of the branches is executed, depending on the If condition’s outcome."},{"key":"C","text":"If statements can also be used to implement ad-hoc loops."},{"key":"D","text":"More branches may be added if needed."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"2-49","exam":2,"num":49,"enun":"Regarding the Switch statement, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"The first branch that the condition evaluates to True is executed."},{"key":"B","text":"Every branch that evaluates to True is executed."},{"key":"C","text":"If no branch evaluates to True, the Otherwise branch is executed."},{"key":"D","text":"The Otherwise branch must exist."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"2-50","exam":2,"num":50,"enun":"Inside an Action flow…","imgDesc":null,"opts":[{"key":"A","text":"… only one Exception Handler may exist."},{"key":"B","text":"… it’s mandatory to have at least one Exception Handler."},{"key":"C","text":"… the Exception Handler flow can’t intersect other flows."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"3-1","exam":3,"num":1,"enun":"If we have multiple Exception Handlers in an Action flow and an Exception is raised...","imgDesc":null,"opts":[{"key":"A","text":"… the execution is always moved to the Global Exception Handler."},{"key":"B","text":"… the execution is moved to the Exception Handler that is most specific to the Exception."},{"key":"C","text":"… the execution is moved to all Exception Handlers of the Action."},{"key":"D","text":"… a Switch statement is needed to select which Exception Handler will continue the execution."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"3-2","exam":3,"num":2,"enun":"In an Aggregate, the Sources section is used for...","imgDesc":null,"opts":[{"key":"A","text":"Defining values for testing the Aggregate’s output records."},{"key":"B","text":"Defining the Entities we want to retrieve records from."},{"key":"C","text":"Defining conditions to get specific subsets of records."},{"key":"D","text":"Defining the order of the Aggregate’s output records."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"3-3","exam":3,"num":3,"enun":"Considering that we can add several filters to an Aggregate, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"A record is included in the output if it matches at least one of the filters."},{"key":"B","text":"Filters are concatenated with the AND operator."},{"key":"C","text":"All filters are translated to SQL and included in the WHERE clause."},{"key":"D","text":"Logical operators and some built-in functions can be used inside filters."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"3-4","exam":3,"num":4,"enun":"Regarding Sorting in Aggregates, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Aggregates only support one sorting criterion."},{"key":"B","text":"If more than one sorting criterion is defined, all of them must have the same direction (ascending or descending)."},{"key":"C","text":"It is mandatory to set the direction for all sorting criteria (ascending or descending)."},{"key":"D","text":"It is only possible to set multiple sorting criteria if duplicate records exist in the entity."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-5","exam":3,"num":5,"enun":"In an Aggregate, the purpose of the Test Values section is…","imgDesc":null,"opts":[{"key":"A","text":"To define values for testing the preview of the Aggregate’s output."},{"key":"B","text":"To set the conditions to get specific records, not all the records."},{"key":"C","text":"To define the order of its output records."},{"key":"D","text":"To define the Entities we want to get records from."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-6","exam":3,"num":6,"enun":"Regarding Screen Aggregates, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"Screen Aggregates run asynchronously and in parallel."},{"key":"B","text":"Screen Aggregates only exist within the scope of the Screen where they were defined."},{"key":"C","text":"Screen Aggregates can only be executed when explicitly called."},{"key":"D","text":"Screen Aggregates can only fetch data from the database."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":true},{"id":"3-7","exam":3,"num":7,"enun":"How is the data fetched by an Aggregate bound to a Table or a List widget?","imgDesc":null,"opts":[{"key":"A","text":"By setting the Source property of the widget to the output of the Aggregate."},{"key":"B","text":"The binding is done automatically since the Aggregate is in the scope of the Screen."},{"key":"C","text":"By adding an Expression inside the widget that refers to an attribute of the data fetched by the Aggregate."},{"key":"D","text":"By creating a Screen Action that programmatically assigns the widget to the data fetched by the Aggregate."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-8","exam":3,"num":8,"enun":"Considering ListItem and List Actions, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"List Actions can only be used inside List Items."},{"key":"B","text":"List Items can be used outside of Lists."},{"key":"C","text":"When List Items have the full swiping option activated, the List Action is not necessary."},{"key":"D","text":"The List Action triggers a Screen Action that will have the logic to be executed on swipe."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-9","exam":3,"num":9,"enun":"Regarding data relationships, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"An Entity must have an identifier to allow relationships."},{"key":"B","text":"A reference attribute needs to be mandatory."},{"key":"C","text":"An Entity can only have one reference attribute."},{"key":"D","text":"The Entity identifier must be an integer."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-10","exam":3,"num":10,"enun":"Which of the following steps is necessary to create a 1-to-1 relationship between Entity A and Entity B?","imgDesc":null,"opts":[{"key":"A","text":"Set the data type of the identifier attribute of Entity B to Entity A Identifier."},{"key":"B","text":"Add a new Entity C, with two reference attributes of type Entity A Identifier and Entity B Identifier."},{"key":"C","text":"Add a new reference attribute of type Entity B Identifier to Entity A."},{"key":"D","text":"Add a new Entity C, with the identifier attribute being a composition of types Entity A Identifier and Entity B Identifier."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":true},{"id":"3-11","exam":3,"num":11,"enun":"Which of the following steps is necessary to create a 1-to-many relationship between a Master Entity A and a Detail Entity B?","imgDesc":null,"opts":[{"key":"A","text":"Set the data type of the identifier attribute of Entity B to Entity A Identifier."},{"key":"B","text":"Add a new Entity C, with two reference attributes of type Entity A Identifier and Entity B Identifier."},{"key":"C","text":"Entity A must have a reference attribute of type Entity B Identifier."},{"key":"D","text":"Entity B must have a reference attribute of type Entity A Identifier."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-12","exam":3,"num":12,"enun":"Which of the following steps is necessary to create a many-to-many relationship between Entity A and Entity B?","imgDesc":null,"opts":[{"key":"A","text":"Set the data type of the identifier attribute of Entity B to Entity A Identifier."},{"key":"B","text":"Add a new reference attribute of type Entity B Identifier to Entity A."},{"key":"C","text":"Add a new Entity C, with two reference attributes of type Entity A Identifier and Entity B Identifier."},{"key":"D","text":"Add a new reference attribute of type Entity B Identifier to Entity A and a new reference attribute of type Entity A Identifier to Entity B."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-13","exam":3,"num":13,"enun":"Regarding Indexes, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Custom indexes cannot be added to an Entity."},{"key":"B","text":"Indexes speed up data retrieval without any kind of impact."},{"key":"C","text":"Unique indexes help prevent data duplication."},{"key":"D","text":"Indexes over referenced attributes cannot be deleted."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-14","exam":3,"num":14,"enun":"Regarding the Delete Rule property, which of the following options does not guarantee referential integrity?","imgDesc":null,"opts":[{"key":"A","text":"Protect."},{"key":"B","text":"Delete."},{"key":"C","text":"Ignore."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-15","exam":3,"num":15,"enun":"Which of the following behaviors does not apply to Forms?","imgDesc":null,"opts":[{"key":"A","text":"A Form groups input widgets and allows displaying and editing data."},{"key":"B","text":"A Form has a Source property that will hold the values submitted by the user."},{"key":"C","text":"Besides input widgets, a Form can hold other widgets such as Links and Buttons."},{"key":"D","text":"A Form is useful to validate data submitted by the user."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"3-16","exam":3,"num":16,"enun":"Considering the Dropdown and the Button Group, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"A Button Group needs a Button Group Item to represent each option that the user will have available to choose from."},{"key":"B","text":"The List property of the Dropdown defines the data that will appear as options to a user on a Screen."},{"key":"C","text":"Each Button Group Item within a Button Group has a Variable property to save the option chosen by the user."},{"key":"D","text":"The Variable property of the Dropdown will hold the value selected by the user. That value is defined in the Options Value property."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":true},{"id":"3-17","exam":3,"num":17,"enun":"The Checkbox or Switch Widgets are bound to a variable of which type?","imgDesc":null,"opts":[{"key":"A","text":"Text."},{"key":"B","text":"Integer."},{"key":"C","text":"Boolean."},{"key":"D","text":"Date."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-18","exam":3,"num":18,"enun":"Considering Inputs and Labels, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Every input must have a Label associated with."},{"key":"B","text":"An input widget can only be used for the Text data type."},{"key":"C","text":"To access the value submitted in an Input widget, we can simply use InputName.Value."},{"key":"D","text":"Labels associated with mandatory fields will display a visual cue on the Screen."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-19","exam":3,"num":19,"enun":"What is the Screen behavior when a widget is not valid (Valid property set to False)?","imgDesc":null,"opts":[{"key":"A","text":"The Screen displays the widget grayed out, and displays the validation error message on the input."},{"key":"B","text":"The widget does not appear on the Screen and the validation message appears in its place."},{"key":"C","text":"Displays the regular widget and displays the validation error message when we hover the mouse."},{"key":"D","text":"Displays the regular widget, applies a specific styling (e.g. red border), and displays the validation error message."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"3-20","exam":3,"num":20,"enun":"Which of the following options is not a built-in validation in OutSystems?","imgDesc":null,"opts":[{"key":"A","text":"Mandatory Fields."},{"key":"B","text":"Maximum length of text fields."},{"key":"C","text":"Data types of input fields."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"3-21","exam":3,"num":21,"enun":"Which of the following options is correct regarding the Valid property of the Form?","imgDesc":null,"opts":[{"key":"A","text":"The Valid property of the Form should be checked after the last custom validation."},{"key":"B","text":"The Valid property of the Form is automatically changed to False when all the input fields of the Form are not valid."},{"key":"C","text":"The Valid property of the Form should be explicitly set to False (e.g. with an Assign) when an input field is not valid."},{"key":"D","text":"When built-in validations are enabled, the Valid property of the Form is automatically checked before executing the client action logic."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":true},{"id":"3-22","exam":3,"num":22,"enun":"Considering Users and Roles in OutSystems, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"By default, end-users are managed in the built-in Users application."},{"key":"B","text":"End-users can only be created programmatically, using Actions from the Users application."},{"key":"C","text":"There are three built-in roles in OutSystems: Anonymous, AppUser and Registered."},{"key":"D","text":"All users, with or without a login, have automatically the Registered Role."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-23","exam":3,"num":23,"enun":"In OutSystems, how do we restrict access to a Screen?","imgDesc":null,"opts":[{"key":"A","text":"Go to the Users application and associate the Screen to a specific role."},{"key":"B","text":"In the Screen Properties, untick roles to restrict their access."},{"key":"C","text":"Use the CheckRole Action."},{"key":"D","text":"We don’t. Only users with a username and password can access."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"3-24","exam":3,"num":24,"enun":"Considering the built-in Role Actions, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"The CheckRole Action checks if a user has that particular Role."},{"key":"B","text":"The GrantRole Action allows to grant a Role to a user programmatically."},{"key":"C","text":"The RevokeRole Action allows to remove a Role from a user programmatically."},{"key":"D","text":"The CreateUserWithRole Action creates an end-user and assigns it the Role."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":true},{"id":"3-25","exam":3,"num":25,"enun":"In OutSystems, where can we place breakpoints?","imgDesc":null,"opts":[{"key":"A","text":"In Actions only (Client-side and Server-Side)."},{"key":"B","text":"Server-side logic only."},{"key":"C","text":"Client-side logic only."},{"key":"D","text":"In Actions and Variables."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-26","exam":3,"num":26,"enun":"In OutSystems, it is possible to inspect the values of variables while debugging.","imgDesc":null,"opts":[{"key":"A","text":"True."},{"key":"B","text":"False."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-27","exam":3,"num":27,"enun":"Which of the following commands is not available in the OutSystems debugger?","imgDesc":null,"opts":[{"key":"A","text":"Stop Debugging."},{"key":"B","text":"Continue Request."},{"key":"C","text":"Step Over."},{"key":"D","text":"Restart Debugging."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-28","exam":3,"num":28,"enun":"When debugging a consumer module, how do we guarantee that the execution stops on breakpoints defined in the producer module?","imgDesc":null,"opts":[{"key":"A","text":"We just need to set breakpoints in the producer module. The execution will stop on its breakpoints automatically."},{"key":"B","text":"We need to also start the debugger on the producer module."},{"key":"C","text":"Nothing, just leave Service Studio open."},{"key":"D","text":"In the producer, set the Entry Module property to the consumer module."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-29","exam":3,"num":29,"enun":"Consider an Aggregate with a \"With or Without\" join between two entities. What is the expected output of the Aggregate?","imgDesc":null,"opts":[{"key":"A","text":"All records from both Entities (FULL OUTER JOIN)."},{"key":"B","text":"Only records where there is a match between the two Entities (INNER JOIN)."},{"key":"C","text":"All records from the left entity even if there is no match in the right entity (LEFT JOIN)."},{"key":"D","text":"All records from the right entity even if there is no match in the left entity (RIGHT JOIN)."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-30","exam":3,"num":30,"enun":"Considering that Aggregates can have hidden columns, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Hiding columns in the Aggregate only affects the preview of the output."},{"key":"B","text":"Columns that are empty in the database are automatically hidden."},{"key":"C","text":"The hidden columns help optimizing the Aggregate."},{"key":"D","text":"The hidden columns are not part of the output."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":true},{"id":"3-31","exam":3,"num":31,"enun":"Which of the following elements can’t be used to create calculated attributes in an Aggregate?","imgDesc":null,"opts":[{"key":"A","text":"Value of the attributes of the Source Entities."},{"key":"B","text":"Built-in Functions that can be translated to SQL (e.g. Length(), Power())."},{"key":"C","text":"Variables."},{"key":"D","text":"Server Actions using Entity Attributes."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-32","exam":3,"num":32,"enun":"Consider that we want to apply aggregation functions in an Aggregate. Which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"We can apply multiple aggregation functions inside an Aggregate."},{"key":"B","text":"The output of the Aggregate will contain all attributes from the Source Entities plus the aggregation columns."},{"key":"C","text":"We can apply the following functions on attributes of integer data type: sum, max, min, count and average."},{"key":"D","text":"The output of the Aggregate will not include the columns at grey."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"3-33","exam":3,"num":33,"enun":"In OutSystems, a Block is a reusable UI component. Which of the following is NOT correct?","imgDesc":null,"opts":[{"key":"A","text":"Block promotes reusability, i.e. develop once, reuse many times."},{"key":"B","text":"A Block encapsulates its own logic."},{"key":"C","text":"A Block improves maintainability, i.e., change the design or functionality, affect all usages."},{"key":"D","text":"A Block can only be reused once."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-34","exam":3,"num":34,"enun":"A Block can be used...","imgDesc":null,"opts":[{"key":"A","text":"Only inside other Screens."},{"key":"B","text":"Inside Screens and Blocks, including itself."},{"key":"C","text":"Inside Screens and Blocks, except on itself."},{"key":"D","text":"Only inside other Blocks."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-35","exam":3,"num":35,"enun":"Regarding Placeholders, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"A Placeholder reserves space in the interface to be allocated when the block is instantiated."},{"key":"B","text":"When a Block with Placeholders is instantiated, it is mandatory to place at least one widget inside the placeholders."},{"key":"C","text":"Placeholders can be added to Screens and Blocks."},{"key":"D","text":"Only one placeholder may be added per Block."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-36","exam":3,"num":36,"enun":"Regarding Block Events, which of the following options is false?","imgDesc":null,"opts":[{"key":"A","text":"Events can be defined at the Block or Screen level."},{"key":"B","text":"Events allow to pass information from the Block’s scope to the parent scope."},{"key":"C","text":"Events are triggered by a Block and handled by its parent."},{"key":"D","text":"Two instances of a Block may use the same handler for the same event."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-37","exam":3,"num":37,"enun":"In which of the following situations is it necessary to define a handler for a Block Event?","imgDesc":null,"opts":[{"key":"A","text":"When the event has Input Parameters."},{"key":"B","text":"When the Block has Placeholders."},{"key":"C","text":"When the event Input Parameters are all mandatory."},{"key":"D","text":"When the Event is set to mandatory."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-38","exam":3,"num":38,"enun":"In which of the following situations is the On Parameters Changed Event triggered?","imgDesc":null,"opts":[{"key":"A","text":"If the value of a Block Input Parameters changes inside a Client Action of the Block."},{"key":"B","text":"The On Parameters Changed must be explicitly triggered by the parent of the Block."},{"key":"C","text":"When the parent of the Block changes the value of at least one of the Block Input Parameters."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-39","exam":3,"num":39,"enun":"Which of the following events is not available in Screens or Blocks?","imgDesc":null,"opts":[{"key":"A","text":"Initialize."},{"key":"B","text":"Ready."},{"key":"C","text":"After Fetch."},{"key":"D","text":"Render."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-40","exam":3,"num":40,"enun":"Considering the Initialize event of a Screen, which of the following would be the best use case for that event?","imgDesc":null,"opts":[{"key":"A","text":"Retrieve data from the server database."},{"key":"B","text":"Act on data returned by a Data Action."},{"key":"C","text":"Manipulate the DOM."},{"key":"D","text":"Set the default value of a Local Variable."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-41","exam":3,"num":41,"enun":"Which of the following is the correct order of occurrence of events in a Screen?","imgDesc":null,"opts":[{"key":"A","text":"Initialize, Ready, Render, Destroy."},{"key":"B","text":"Initialize, Destroy, Ready, Render."},{"key":"C","text":"Ready, Initialize, Render, Destroy."},{"key":"D","text":"Initialize, Render, Ready, Destroy."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-42","exam":3,"num":42,"enun":"Which of the following options is false regarding Screen Aggregates?","imgDesc":null,"opts":[{"key":"A","text":"The Render Event on the Screen is triggered when an Aggregate with the Fetch property set to \"only on demand\" finishes its execution."},{"key":"B","text":"A Screen Aggregate can be triggered when a screen is initializing or only On Demand."},{"key":"C","text":"All Aggregates, by default, have the Fetch property set to On Demand."},{"key":"D","text":"The On After Fetch Event is triggered for every Aggregate, regardless of its Fetch property."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-43","exam":3,"num":43,"enun":"Consider an Aggregate with the Fetch property set to Only On Demand. When does that Aggregate run?","imgDesc":null,"opts":[{"key":"A","text":"Automatically, when the Screen is initializing."},{"key":"B","text":"Programmatically, using a Refresh Data node in a Screen Action."},{"key":"C","text":"Automatically, when the Aggregates set to run \"At Start\" finish."},{"key":"D","text":"Programmatically, using a Server Action."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"3-44","exam":3,"num":44,"enun":"Which of the following options is correct regarding Client Variables?","imgDesc":null,"opts":[{"key":"A","text":"The value of a Client Variable is shared among all logged-in users."},{"key":"B","text":"Lists or Binary Data can also be stored on Client Variables."},{"key":"C","text":"Client Variables should be used to store confidential information."},{"key":"D","text":"Client Variables are useful to cache frequently accessed information."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-45","exam":3,"num":45,"enun":"Which of the following would be a good use case for a Client Variable?","imgDesc":null,"opts":[{"key":"A","text":"Credit Card Number."},{"key":"B","text":"Profile Picture."},{"key":"C","text":"User Identifier."},{"key":"D","text":"User Name."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"3-46","exam":3,"num":46,"enun":"The value of a Site Property can be modified in Service Center to change the application behavior at runtime.","imgDesc":null,"opts":[{"key":"A","text":"True."},{"key":"B","text":"False."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"3-47","exam":3,"num":47,"enun":"Which of the following is a good use case for a Site Property?","imgDesc":null,"opts":[{"key":"A","text":"Current user ID."},{"key":"B","text":"Total Stock Quantity of Products."},{"key":"C","text":"REST Web Service API Key."},{"key":"D","text":"Search Keyword."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"3-48","exam":3,"num":48,"enun":"Which of the following options is correct, when implementing pagination with Tables or Lists?","imgDesc":null,"opts":[{"key":"A","text":"The Start Index property of the Pagination holds the current page number."},{"key":"B","text":"The Max Records property of the Pagination holds the number of records to show per page."},{"key":"C","text":"The Total Count input of the Pagination pattern should be set to the number of records per page."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"3-49","exam":3,"num":49,"enun":"Regarding sorting in a Table, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"All header cells need to have the Sort Attribute property defined."},{"key":"B","text":"Only the Sort Attribute of the header cells needs to be defined. Data is refreshed automatically."},{"key":"C","text":"The On Sort event has an input parameter containing the clicked column."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"3-50","exam":3,"num":50,"enun":"Regarding sorting Lists, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Lists have a built-in On Sort event."},{"key":"B","text":"Sort clauses cannot be changed dynamically at runtime when using Lists."},{"key":"C","text":"Other Widgets should be used to allow the end-user to define the sort criteria."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-1","exam":4,"num":1,"enun":"Consider the data model below containing the Use, Asset and Category Entities. What needs to be changed in the data model to have Assets assigned to one specific Category?","imgDesc":null,"opts":[{"key":"A","text":"Create a new attribute, AssetId, in the Category Entity, with Data Type set to Long Integer."},{"key":"B","text":"Create a new attribute, CategoryId, in the Asset Entity, with Data Type set to Category Identifier."},{"key":"C","text":"Create a new attribute, AssetId, in the Category Entity, with Data Type set to Asset Identifier."},{"key":"D","text":"Create a new attribute, CategoryId, in the Asset Entity, with Data Type set to Long Integer."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-2","exam":4,"num":2,"enun":"Consider the following Entity Diagram. What is the data type of the Id attribute of the ShippingDetail Entity?","imgDesc":"Diagrama não incluído na exportação PDF; refere-se à entidade de extensão 1:1 `ShippingDetail` associada a `Order`.","opts":[{"key":"A","text":"Order Identifier."},{"key":"B","text":"ShippingDetail Identifier."},{"key":"C","text":"Integer."},{"key":"D","text":"Long Integer."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-3","exam":4,"num":3,"enun":"Considering Static Entities, which of the following operations can be done at runtime?","imgDesc":null,"opts":[{"key":"A","text":"Expose the Entity as Public."},{"key":"B","text":"Fetch data. Creating and editing records must be done in design time."},{"key":"C","text":"Fetch, create and update records."},{"key":"D","text":"Change the Is_Active attribute of the records to True/False."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-4","exam":4,"num":4,"enun":"Consider the Excel file and Entity in the picture, where the Entity attributes have the following data types:","imgDesc":"Imagem do ficheiro Excel e da Entidade não incluída na exportação PDF.","opts":[{"key":"A","text":"The PhoneNumber attribute will not be populated with data, because the values in the respective Excel column do not match the expected data type."},{"key":"B","text":"The matching attributes of the Entity will be populated with the values in the respective Excel columns."},{"key":"C","text":"The Id attribute will not be populated with data, since there is no matching column in the Excel file."},{"key":"D","text":"The Email attribute will not be populated with data, because the values in the respective Excel column do not match the expected data type."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"4-5","exam":4,"num":5,"enun":"The Delete<Entity>Entity Action...","imgDesc":null,"opts":[{"key":"A","text":"... returns the deleted record in its Output Parameter."},{"key":"B","text":"... requires that the record to be deleted exists in the database, otherwise an exception is thrown."},{"key":"C","text":"... expects the Entity record to be deleted, as Input Parameter."},{"key":"D","text":"... expects the Id of the record to be deleted, as Input Parameter."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-6","exam":4,"num":6,"enun":"Consider that you need to change the database of your application, with the respective Data Model in the following image, to include the types of Products. A Product can **only** have one type and those types can be: Books, Music, Movies and Electronics. You have been told by the project manager that the Product types have not changed since last year. Which of the following is the **best** way to implement this change?","imgDesc":"Imagem do Data Model não incluída na exportação PDF.","opts":[{"key":"A","text":"Add a Text attribute, Product Type, to Product and set its values to Books\", \"Music\", \"Movies and Electronics."},{"key":"B","text":"Add a new Static Entity, Product Type, with 4 records, one for each type of product. In addition, add an attribute to the Static Entity of type Product Identifier."},{"key":"C","text":"Add an Integer attribute, ProductType, to the Product Entity and set i for Books, 2 for Music, 3 for Movies, e for Electronics."},{"key":"D","text":"Add a new Static Entity, ProductType, with 4 records, one for each type of product. In addition, add an attribute to the Product Entity of type Product Type Identifier."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-7","exam":4,"num":7,"enun":"Considering the following Aggregate, what would be the **correct** way of obtaining the total price (including VAT) per Order?","imgDesc":"Imagem do Aggregate não incluída na exportação PDF.","opts":[{"key":"A","text":"Create a Sum aggregation function over the OrderProduct.Quantity, Porduct.VAT and Product.WholesalePrice, then add a calculated attribute ProductTotalWithVAT with the expression: SumQuantity * SumWholesalePrice * (1 +SumVAT/100)."},{"key":"B","text":"Create a Server Action that calculates the total price with VAT for an Order, based on the OrderId Input Parameter. Then, add a calculated attribute ProductTotalWithVAT to the Aggregate, using the output of the Action."},{"key":"C","text":"Create a calculated attribute ProductTotalWithVAT with the expression: Product.WholesalePrice * (1 + Product.VAT/100) * OrderProduct.Quantity. Then, use a Sum aggregation function over that attribute."},{"key":"D","text":"This is not possible to do with an Aggregate. A SQL Query is required to determine the total price per Order."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-8","exam":4,"num":8,"enun":"Considering calculated attributes in Aggregates, which of the following options is **correct**?","imgDesc":null,"opts":[{"key":"A","text":"Calculated attributes need to defined using SQL syntax."},{"key":"B","text":"Calculated attributes are calculated in the memory by OutSystems before executing the final SQL."},{"key":"C","text":"Calculated attributes allow using your own functions over existing attribute values."},{"key":"D","text":"Calculated attributes allow adding new attributes based on the values of existing attributes."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-9","exam":4,"num":9,"enun":"Consider the following Aggregate that shows all existing data from the Movie and MovieGenre Entities in the Preview area. Which of the following options is **correct**?","imgDesc":"Imagem do Aggregate não incluída na exportação PDF.","opts":[{"key":"A","text":"Changing the Join to Only With won't display any data in the Preview."},{"key":"B","text":"Changing the Join to Only With, and swapping the Entities order in the Join, will yield the same result in the Preview."},{"key":"C","text":"Changing the Join to With or Without will yield the same result in the Preview."},{"key":"D","text":"Changing the Join to With or Without, and swapping the Entities order in the Join, won't display any data in the Preview."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-10","exam":4,"num":10,"enun":"In the following Aggregate, which of the following options is the **best** way to ignore the Orders that have been Canceled?","imgDesc":"Imagem do Aggregate não incluída na exportação PDF.","opts":[{"key":"A","text":"Add a Filter with: OrderStatus <> \"Canceled\"."},{"key":"B","text":"Group By OrderStatus.Label and the Add a Group Filter with: OrderStatus.Label <> \"Canceled\"."},{"key":"C","text":"Add a Filter with: Order.OrderStatusId <> NullIdentifier()."},{"key":"D","text":"Add a Filter with: Order.OrderStatusId <> Entites.OrderStatus.Canceled."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-11","exam":4,"num":11,"enun":"Considering a Screen with a Data Action that was created using the Fetching Data from Other Sources option, which of the following sentences is **False**?","imgDesc":null,"opts":[{"key":"A","text":"A Data Action can run Aggregates."},{"key":"B","text":"A Data Action can execute server-side logic."},{"key":"C","text":"A Data Action can run Advanced SQL Queries."},{"key":"D","text":"A Data Action can execute client-side logic."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-12","exam":4,"num":12,"enun":"Consider the Sorting criteria in the given Aggregate. If there are at least two movies with the same title and different years in the database, which of the following options is true?","imgDesc":"Imagem do Aggregate não incluída na exportação PDF.","opts":[{"key":"A","text":"Deleting the Movie.Title sort will not change the query output."},{"key":"B","text":"Changing the Movie.Year direction to Descending will sort the results by Title first and then by Year, changing the query output."},{"key":"C","text":"Deleting the Movie.Year sort will require a new sorting criteria to replace it."},{"key":"D","text":"Changing the Movie.Year direction to Descending will sort the results by Year first and the by Title, changing the query output."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-13","exam":4,"num":13,"enun":"In the context of a Screen, when is the On After Fetch lifecycle event triggered?","imgDesc":null,"opts":[{"key":"A","text":"When an Input Parameter of the Screen changes."},{"key":"B","text":"When an Aggregate or Data Action finishes fetching data."},{"key":"C","text":"When a call to a Server Action terminates."},{"key":"D","text":"When all the data in a Screen is fetched."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-14","exam":4,"num":14,"enun":"Considering the On Ready lifecycle event, which of the following options is **true**?","imgDesc":null,"opts":[{"key":"A","text":"The On Ready Event is triggered right after the On Render event handler of the Screen or Block."},{"key":"B","text":"The On Ready Event is triggered in a Block anytime the parent changes one of its Input Parameters."},{"key":"C","text":"The On Ready Event is triggered after the Screen or Block structure is ready and before it is rendered."},{"key":"D","text":"The On Ready Event is triggered before navigating to the Screen and the application starts fetching data."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":true},{"id":"4-15","exam":4,"num":15,"enun":"Consider a Screen with two Aggregates with the Fetch Property set to At Start. For both Aggregates, when is the data fetched?","imgDesc":null,"opts":[{"key":"A","text":"Concurrently after the On Initialize Event."},{"key":"B","text":"Sequentially after the On Render Event."},{"key":"C","text":"Sequentially after the On Ready Event."},{"key":"D","text":"Concurrently after the On Ready Event."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-16","exam":4,"num":16,"enun":"Considering the Screen Lifesycle and its Events, what happens when the user transitions from Screen A to Screen B?","imgDesc":null,"opts":[{"key":"A","text":"The Aggregates of Screen B run after the On Destroy Event of Screen A is triggered."},{"key":"B","text":"The Aggregates of Screen B run when the Screen is rendered."},{"key":"C","text":"The OnDestroy event of Screen A is triggered when Screen B is being initialized."},{"key":"D","text":"The OnDestroy event of the Screen A is triggered after Screen B is rendered."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-17","exam":4,"num":17,"enun":"If the Aggregate's Fetch property is set to Only On Demand, when will the query be triggered?","imgDesc":null,"opts":[{"key":"A","text":"When a Refresh Data node is used on the Aggregate."},{"key":"B","text":"Automatically, when the data is needed on the screen."},{"key":"C","text":"After the OnRender Event is triggered."},{"key":"D","text":"After the Aggregates set to be fetched At Start."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-18","exam":4,"num":18,"enun":"What needs to be changed in the following Aggregate to obtain the number of comments per Movie, for movies with one or more comments?","imgDesc":"Imagem do Aggregate não incluída na exportação PDF. Nota: o PDF contém apenas 3 opções nesta pergunta.","opts":[{"key":"A","text":"Change the existing Join to With or Without and create a Count over the UserMovieComment Id attribute."},{"key":"B","text":"Change the existing Join to With or Without, create a Group By over the Movie.Id attribute, and a Count over the UserMovieComment.Id attribute."},{"key":"C","text":"Create a Group By over the Movie.Id attribute and a Count over the UserMovieComment.Id attribute."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-19","exam":4,"num":19,"enun":"What will happen once the following Block is dropped on the area represented in the picture?","imgDesc":"Imagem não incluída na exportação PDF.","opts":[{"key":"A","text":"The Block content will be displayed since it is possible to nest Blocks."},{"key":"B","text":"The Block content will be displayed, but only if it is inside a Container."},{"key":"C","text":"We will get an error since we cannot place a Block inside itself."},{"key":"D","text":"We will get and error since we cannot nest a Block inside another Block."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-20","exam":4,"num":20,"enun":"The Countdown Block has an OnClick Action that triggers the Start Event. What is expected when this Block is added to a Screen?","imgDesc":null,"opts":[{"key":"A","text":"Is is always necessary to specify an Event handler on the Screen for the Start Event."},{"key":"B","text":"It is necessary to specify an Event handler on the Screen if the Start Event is mandatory."},{"key":"C","text":"It is not necessary to specify and Event handler on the Screen because the Start Event does not have Input Parameters."},{"key":"D","text":"It is necessary to specify an Event handler on the Screen because the Block will be added to a Screen."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-21","exam":4,"num":21,"enun":"Which of the following options is correct regarding Event parameters?","imgDesc":null,"opts":[{"key":"A","text":"An Event needs to have an Output Parameter if it is mandatory."},{"key":"B","text":"An Input Parameter of an Event is only available in the scope of the Block."},{"key":"C","text":"An Output Parameter of an Event can send information to the parent."},{"key":"D","text":"An Event Input Parameter can be used in Event handler Actions."}],"correct":"D","originalKey":"B","note":"Atenção: O formulário original marcava B, mas na documentação oficial da OutSystems os Input Parameters de um Event servem precisamente para enviar dados do Block para o Event Handler no pai (D), não ficando restritos ao scope do Block.","prevAnswer":"B","prevWrong":false},{"id":"4-22","exam":4,"num":22,"enun":"Which of the following elements cannot be created in a Block?","imgDesc":null,"opts":[{"key":"A","text":"Server Actions."},{"key":"B","text":"Aggregates."},{"key":"C","text":"Events."},{"key":"D","text":"Input Parameters."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-23","exam":4,"num":23,"enun":"Consider the following List Widget, with the GetEmployees Aggregate as Source, and where the Input_Search is being used to search by employee name. However, when the user inserts a search keyword, the List of Employees is not being updated. What is missing in this application to make the search work?","imgDesc":"Imagem do widget/Aggregate não incluída na exportação PDF.","opts":[{"key":"A","text":"Assign the SearchKeyword with the user inserted value."},{"key":"B","text":"Trigger the OnRender event."},{"key":"C","text":"Explicitly refresh the List Widget."},{"key":"D","text":"Add a filter using the SearchKeyword to the Aggregate."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":true},{"id":"4-24","exam":4,"num":24,"enun":"Consider a Screen with the Form with multiple input fields inside it. When the end-user is filling the input fields with data, where is that data being stored?","imgDesc":null,"opts":[{"key":"A","text":"In the Entity attributes associated with each input field."},{"key":"B","text":"In the Variables associated with each input field."},{"key":"C","text":"In the Variable associated with the Form."},{"key":"D","text":"In a Local Variable that is automatically created for the Form."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-25","exam":4,"num":25,"enun":"Just Considering Built-in validations, which of the following scenarios would make a Form not valid?","imgDesc":null,"opts":[{"key":"A","text":"The user inserts a text on the field expect an Integer."},{"key":"B","text":"The user inserts a number on a field expects a Text."},{"key":"C","text":"The user inserts a negative number on a field that expects an Integer."},{"key":"D","text":"The user inserts a date on a field that expect a Text."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-26","exam":4,"num":26,"enun":"Consider the next image and assume that we have a ButtonGroup with three ButtonGroupItems with the following values: Entities.Priority.Low, Entities.Priority.High. What should be the data type of the element selected for the ButtonGroup's Variable property?","imgDesc":"Imagem não incluída na exportação PDF.","opts":[{"key":"A","text":"Long Integer."},{"key":"B","text":"Text."},{"key":"C","text":"Priority Identifier."},{"key":"D","text":"Priority."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-27","exam":4,"num":27,"enun":"Considering the following example, what should be the option selected in the Options Value property of the Dropdown 1?","imgDesc":"Imagem não incluída na exportação PDF.","opts":[{"key":"A","text":"User.Name."},{"key":"B","text":"User."},{"key":"C","text":"GetUsers.List.Current."},{"key":"D","text":"User.Id."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-28","exam":4,"num":28,"enun":"Consider that we have mandatory Input widget and we add a Label text next to it on the Screen. What is the necessary to do to automatically create a visual cue to end-user, indicating that the Input is mandatory?","imgDesc":null,"opts":[{"key":"A","text":"Select the corresponding Label in the properties of the Input widget."},{"key":"B","text":"Select the corresponding Input widget in the properties of the Label."},{"key":"C","text":"Drag the Input widget and drop it inside the Label."},{"key":"D","text":"Enclose the Label and the Input widgets in a Container."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-29","exam":4,"num":29,"enun":"Consider the following image, where we have the ContactList widget with the GetContacts Aggregate as Source. Which of the following options should we use to properly display the Name of all the contacts in the ContactList?","imgDesc":"Imagem não incluída na exportação PDF.","opts":[{"key":"A","text":"ContactList.Contacts.Name."},{"key":"B","text":"Home.GetContacts.Contacts.Name."},{"key":"C","text":"Contacts.Name."},{"key":"D","text":"GetContacts.List.Current.Contacts.Name."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-30","exam":4,"num":30,"enun":"Considering the we want to display all the records of an Entity in a List widget, which of the following statements is true?","imgDesc":null,"opts":[{"key":"A","text":"An Expression in a List widget can combine the values of more than on attribute of a record."},{"key":"B","text":"Only Expression widgets can be used to display the values of the Entity attributes."},{"key":"C","text":"A List Item widget must be used to display the values of each record in the List widget."},{"key":"D","text":"The Entity must be set as the Source property of the List widget."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":true},{"id":"4-31","exam":4,"num":31,"enun":"Considering a Link in a Block, which of the following options cannot be set as the Link's OnClick Destination?","imgDesc":null,"opts":[{"key":"A","text":"Event."},{"key":"B","text":"Screen."},{"key":"C","text":"Client Action."},{"key":"D","text":"Server Action."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-32","exam":4,"num":32,"enun":"Consider the following two final implementations of the Loop Action (A and B), where the Assign statement is detailed on the right. The goal is to repeat the RunActionWithNumber multiple times based on the value of the Number input Parameter (e.g. 10). Based on this scenario, select the correct option.","imgDesc":"Imagem dos fluxos A e B não incluída na exportação PDF.","opts":[{"key":"A","text":"Only Alternative A is possible, since a For Each always requires a list to iterate."},{"key":"B","text":"Both alternatives are possible, as long as the if and For Each conditions are set to Number >= 0."},{"key":"C","text":"Only Alternative B is possible, since the For Each is the logic statement used to implement generic loops."},{"key":"D","text":"Only Alternative A is possible, as long as the condition is Number < 0."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-33","exam":4,"num":33,"enun":"Consider the following Client Action containing a Switch, where its conditions are detailed on the connectors. The assignments are also detailed on the respective Assign labels. Which of the following options is correct?","imgDesc":"Imagem do fluxo com Switch não incluída na exportação PDF.","opts":[{"key":"A","text":"If the value of the Priority is \"d\", the Color output will be \"grey\"."},{"key":"B","text":"The Color output value will always be \"red\", \"yellow\" or \"green\"."},{"key":"C","text":"The Color output value will always be \"grey\"."},{"key":"D","text":"The Color output value will be influenced by the order of the conditions."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-34","exam":4,"num":34,"enun":"Before iterating a non-empty List, the List.Current element contains...","imgDesc":null,"opts":[{"key":"A","text":"... the last record of the list."},{"key":"B","text":"... null."},{"key":"C","text":"... an empty record."},{"key":"D","text":"... the first record of the List."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-35","exam":4,"num":35,"enun":"Consider the following Client Action, where the Employee_Create Action has no exception handling and just creates a new record in the database, using the CreateEmployee Entity Action. What happens if an exception is thrown during the execution of the Employee_Create Action?","imgDesc":"Imagem do fluxo da Client Action não incluída na exportação PDF.","opts":[{"key":"A","text":"No exception flow is executed and an information message is shown."},{"key":"B","text":"The AllExceptions flow is executed and an error message is shown."},{"key":"C","text":"The DatabaseException flow is executed and and error message is shown."},{"key":"D","text":"Both DatabaseException and AllExceptions flows are executed and an error message is shown."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-36","exam":4,"num":36,"enun":"Setting the Function property of a Client Action to Yes...","imgDesc":null,"opts":[{"key":"A","text":"... allows it to be used in other modules."},{"key":"B","text":"... allows it to be used in Screen Expressions and other Client Actions."},{"key":"C","text":"... restricts it to be exclusively used in other Client Actions."},{"key":"D","text":"... restricts it to be exclusively used in an Expression on a Screen."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-37","exam":4,"num":37,"enun":"Regarding Client and Server Actions, which of the following options is correct?","imgDesc":null,"opts":[{"key":"A","text":"Server Actions can be set as the Destination of a Button / Link."},{"key":"B","text":"Server Actions can execute Client Actions."},{"key":"C","text":"Client Actions can execute Public Server Actions, defined on the modules."},{"key":"D","text":"Client Actions from a Screen can execute Client Actions from other Screens."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-38","exam":4,"num":38,"enun":"Consider the following Action flow, where some custom validations are performed over data submitted from the Form named ProductForm. Which of the following conditions should be set for the highlighted if statement?","imgDesc":"Imagem do fluxo de validação não incluída na exportação PDF.","opts":[{"key":"A","text":"ProductForm.Valid = True."},{"key":"B","text":"ProductForm.Price <= 0 and ProductForm.QuantityInStock < 0."},{"key":"C","text":"ProductForm.Price > 0 and ProductForm.QuantityInStock >= 0."},{"key":"D","text":"ProductForm.Valid = False."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-39","exam":4,"num":39,"enun":"Consider the following Server Action. When the if statement is evaluated to False. What is the expected behavior?","imgDesc":"Imagem do fluxo da Server Action não incluída na exportação PDF.","opts":[{"key":"A","text":"The DatabaseException flow of the Action will be executed."},{"key":"B","text":"The Exception will not be handled."},{"key":"C","text":"The AllExceptions flow of the Action will be executed."},{"key":"D","text":"The Exception will be handled by the module Global Exception Handler."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-40","exam":4,"num":40,"enun":"Which of the following options is correct, regarding Site Properties in OutSystems?","imgDesc":null,"opts":[{"key":"A","text":"Site Properties can be changed programatically."},{"key":"B","text":"Site Properties can only be changed in Service Center."},{"key":"C","text":"Site Properties can have the List Data Type."},{"key":"D","text":"Site Properties can only be changed in Service Studio."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-41","exam":4,"num":41,"enun":"Consider the following Roles properties from the CinemaDetail Screen. What are the minimum required Roles for a user to access this Screen?","imgDesc":"Imagem das propriedades de Roles não incluída na exportação PDF.","opts":[{"key":"A","text":"Either OSMDbAdmin or OSMDbUser."},{"key":"B","text":"Registered and either the OSMDbAdmin or OSMDbUser."},{"key":"C","text":"Registered and OSMDbAdmin and OSMDbUser."},{"key":"D","text":"Registered."}],"correct":"D","originalKey":null,"note":null,"prevAnswer":"D","prevWrong":false},{"id":"4-42","exam":4,"num":42,"enun":"Não temos a questão. *(Pergunta original omissa no PDF; refere-se a verificar a role `Manager` através de `CheckManagerRole` para usar numa condição `If` num Screen Reactive.)*","imgDesc":null,"opts":[{"key":"A","text":"Create a Client Action that uses the CheckManagerRole, set it as a Function and set its output to the result of the CheckRole Action. Then, use the output in the if condition."},{"key":"B","text":"Create a Data Action that uses the CheckManagerRole and set its output to the result of the CheckRole Action. Then, use the output in the if condition."},{"key":"C","text":"Just use the CheckManagerRole Action directly in the if condition."},{"key":"D","text":"Use the CheckManagerRole action directly in the if condition and have just the Manager Role selected in this Screen roles."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-43","exam":4,"num":43,"enun":"Setting the Expose Read Only property of a Entity to Yes will...","imgDesc":null,"opts":[{"key":"A","text":"... require other modules to use SQL Queries to modify the Entity's data."},{"key":"B","text":"... allow other modules to use all of its Entity Actions."},{"key":"C","text":"... only expose the Get<Entity>Entity Action to other modules."},{"key":"D","text":"... prevent other modules from accessing the Entity records."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-44","exam":4,"num":44,"enun":"Não temos a questão. Mas temos a mesma imagem no exame 1 com a seguinte pergunta: After opening the OSMDb module, the following appears on the Manage Dependencies dialog. Considering this scenario, select the **correct** option.","imgDesc":"Imagem do diálogo Manage Dependencies não incluída na exportação PDF.","opts":[{"key":"A","text":"An element from the OSMDb_Core module referenced in the OSMDb module had a breaking change."},{"key":"B","text":"Publishing the OSMDb module will refresh all the dependencies."},{"key":"C","text":"Clicking the Apply button will refresh all the dependencies."},{"key":"D","text":"One element from the OSMDb_Core module was modified, but the module was not published yet."}],"correct":"A","originalKey":null,"note":null,"prevAnswer":"A","prevWrong":false},{"id":"4-45","exam":4,"num":45,"enun":"When are Client Variables reset to their default values?","imgDesc":null,"opts":[{"key":"A","text":"Client Variables are never reset."},{"key":"B","text":"Whenever the user logs in."},{"key":"C","text":"Whenever the user logs out."},{"key":"D","text":"Whenever the user closes browser."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-46","exam":4,"num":46,"enun":"Consider the following Action that calculates the square root (sqrt) of a positive decimal number (N). Knowing that the function was called with N = 4, and the debugger is stopped at the Start node, what will happen when the developer selects the Continue (F9) option highlighted in the picture?","imgDesc":"Imagem do fluxo no debugger não incluída na exportação PDF.","opts":[{"key":"A","text":"The Action will end, with sqrt = 0, and an error message will appear on the Screen."},{"key":"B","text":"The debugger will stop at the sqrt = N Assign node."},{"key":"C","text":"The Action will end, with sqrt = Sqrt(N)."},{"key":"D","text":"The debugger will stop at the N < 0 if node."}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-47","exam":4,"num":47,"enun":"In OutSystems, how can application error logs be analysed?","imgDesc":null,"opts":[{"key":"A","text":"In Service Studio, under the Logic tab."},{"key":"B","text":"In Service Center, under the Monitoring tab."},{"key":"C","text":"Must be queried directly from the database."},{"key":"D","text":"The errors can only be analysed at runtime."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-48","exam":4,"num":48,"enun":"Consider that we want to add the pagination functionality to a List widget that displays employees fetched using the GetEmployees Aggregate. What should be the value of the TotalCount property of the Pagination widget?","imgDesc":null,"opts":[{"key":"A","text":"The number of elements displayed per page."},{"key":"B","text":"The Count output of the Aggregate."},{"key":"C","text":"The number of elements in the Aggregate output list."},{"key":"D","text":"The total number of pages available to navigate to."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false},{"id":"4-49","exam":4,"num":49,"enun":"Complete the following sentence: \"The Form's Valid property...","imgDesc":null,"opts":[{"key":"A","text":"... is set to True only if the user fills all of the Form's mandatory input fields.\""},{"key":"B","text":"... must be explicitly set to True or False using an Assign.\""},{"key":"C","text":"... is set to False when one of the Form's input fields is not valid.\""},{"key":"D","text":"... is set to False when a Database Exception is triggered when saving the Form data.\""}],"correct":"C","originalKey":null,"note":null,"prevAnswer":"C","prevWrong":false},{"id":"4-50","exam":4,"num":50,"enun":"Consider the following List widget that has the GetEmployees Aggregate as Source, and the Button Group that allows end-users to dynamically sort the List when one of the items is clicked. The dynamic sorting is working properly, but now there is a new requirement: allow the end-user to also sort by Email. What is necessary to do in the application to support the new requirement?","imgDesc":"Imagem do List widget e Button Group não incluída na exportação PDF.","opts":[{"key":"A","text":"Add a new Local Variable to hold the new sorting by Email."},{"key":"B","text":"Add a new ButtonGroupItem and set its value to {Employee}.[Email]."},{"key":"C","text":"Change the logic of the Sort Action to include the new sorting by Email."},{"key":"D","text":"Add a new Sort criteria by Employee.Email to the Aggregate."}],"correct":"B","originalKey":null,"note":null,"prevAnswer":"B","prevWrong":false}];
+
+    const DECKS = [
+      { id: 'exam1', title: 'OutSystems Exame 1', desc: 'As 50 perguntas completas do Exame 1 Reactive.', filter: q => q.exam === 1 },
+      { id: 'exam2', title: 'OutSystems Exame 2', desc: 'As 50 perguntas completas do Exame 2 Reactive (P12 corrigida).', filter: q => q.exam === 2 },
+      { id: 'exam3', title: 'OutSystems Exame 3', desc: 'As 50 perguntas completas do Exame 3 Reactive.', filter: q => q.exam === 3 },
+      { id: 'exam4', title: 'OutSystems Exame 4', desc: 'As 50 perguntas completas do Exame 4 Reactive (P21 corrigida).', filter: q => q.exam === 4 },
+      { id: 'wrong_prev', title: '🎯 Só as que Errei Antes', desc: 'Revisão cirúrgica das 33 perguntas que falhaste nas folhas originais.', filter: q => q.prevWrong },
+      { id: 'random50', title: '🎲 Simulado Oficial Aleatório', desc: '50 perguntas sorteadas aleatoriamente entre os 4 exames (200 total).', random: 50 }
+    ];
+
+    let state = {
+      mode: 'study',
+      deckId: null,
+      deckTitle: '',
+      questions: [],
+      index: 0,
+      answers: {},
+      flagged: {},
+      timerSeconds: 7200,
+      timerInterval: null,
+      startedAt: null,
+      reviewFilter: 'all'
+    };
+
+    const $ = id => document.getElementById(id);
+
+    function getBestScores() {
+      try { return JSON.parse(localStorage.getItem('os_sim_best') || '{}'); } catch { return {}; }
+    }
+    function saveBestScore(deckId, pct) {
+      const scores = getBestScores();
+      if (!scores[deckId] || pct > scores[deckId]) {
+        scores[deckId] = pct;
+        localStorage.setItem('os_sim_best', JSON.stringify(scores));
+      }
+    }
+
+    function escapeHtml(str) {
+      return String(str)
+        .replace(/&/g, '&amp;')
+        .replace(/</g, '&lt;')
+        .replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;');
+    }
+
+    function shuffleArr(arr) {
+      const a = [...arr];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function renderHome() {
+      stopTimer();
+      $('homeView').classList.remove('hidden');
+      $('quizView').classList.add('hidden');
+      $('resultsView').classList.add('hidden');
+      $('homeBtn').classList.add('hidden');
+
+      const best = getBestScores();
+      const grid = $('deckGrid');
+      grid.innerHTML = '';
+
+      DECKS.forEach(d => {
+        const count = d.random ? d.random : ALL_QUESTIONS.filter(d.filter).length;
+        const bestPct = best[d.id];
+        const card = document.createElement('div');
+        card.className = 'deck-card';
+        card.innerHTML = `
+          <div>
+            <h3>${d.title}</h3>
+            <p>${d.desc}</p>
+          </div>
+          <div class="deck-meta">
+            <span>${count} perguntas</span>
+            ${bestPct !== undefined ? `<span class="pill ${bestPct >= 70 ? 'pill-ok' : 'pill-warn'}">Melhor: ${bestPct}%</span>` : '<span class="pill">Novo</span>'}
+          </div>
+          <button class="btn btn-primary" style="justify-content:center;">Começar →</button>
+        `;
+        card.querySelector('button').addEventListener('click', () => startDeck(d));
+        grid.appendChild(card);
+      });
+    }
+
+    function startDeck(deck, customQuestions = null) {
+      let qs = customQuestions
+        ? [...customQuestions]
+        : (deck.random ? shuffleArr(ALL_QUESTIONS).slice(0, deck.random) : ALL_QUESTIONS.filter(deck.filter));
+
+      if ($('shuffleCheck').checked && !deck.random && !customQuestions) {
+        qs = shuffleArr(qs);
+      }
+
+      state.deckId = deck.id;
+      state.deckTitle = customQuestions ? `${deck.title} (Só Erradas)` : deck.title;
+      state.questions = qs;
+      state.index = 0;
+      state.answers = {};
+      state.flagged = {};
+      state.startedAt = Date.now();
+      state.timerSeconds = 7200;
+
+      $('homeView').classList.add('hidden');
+      $('resultsView').classList.add('hidden');
+      $('quizView').classList.remove('hidden');
+      $('homeBtn').classList.remove('hidden');
+
+      $('quizTitle').textContent = state.deckTitle;
+      $('quizModePill').textContent = state.mode === 'study' ? '📚 Modo Estudo' : '⏱️ Modo Exame';
+
+      if (state.mode === 'exam') {
+        $('timerPill').classList.remove('hidden');
+        $('liveScorePill').classList.add('hidden');
+        startTimer();
+      } else {
+        $('timerPill').classList.add('hidden');
+        $('liveScorePill').classList.remove('hidden');
+        stopTimer();
+      }
+
+      renderQuestion();
+    }
+
+    function startTimer() {
+      stopTimer();
+      updateTimerDisplay();
+      state.timerInterval = setInterval(() => {
+        state.timerSeconds--;
+        updateTimerDisplay();
+        if (state.timerSeconds <= 0) {
+          stopTimer();
+          finishQuiz();
+        }
+      }, 1000);
+    }
+
+    function stopTimer() {
+      if (state.timerInterval) {
+        clearInterval(state.timerInterval);
+        state.timerInterval = null;
+      }
+    }
+
+    function updateTimerDisplay() {
+      const h = String(Math.floor(state.timerSeconds / 3600)).padStart(2, '0');
+      const m = String(Math.floor((state.timerSeconds % 3600) / 60)).padStart(2, '0');
+      const s = String(state.timerSeconds % 60).padStart(2, '0');
+      $('timerPill').textContent = `${h}:${m}:${s}`;
+    }
+
+    function renderQuestion() {
+      const q = state.questions[state.index];
+      const total = state.questions.length;
+      const chosen = state.answers[q.id];
+      const isStudyAnswered = state.mode === 'study' && Boolean(chosen);
+
+      $('quizCounter').textContent = `${state.index + 1} / ${total}`;
+      const answeredCount = Object.keys(state.answers).length;
+      $('progressFill').style.width = `${Math.round((answeredCount / total) * 100)}%`;
+      $('answeredCountText').textContent = `${answeredCount} / ${total} respondidas`;
+
+      if (state.mode === 'study') {
+        const correctCount = state.questions.filter(item => state.answers[item.id] === item.correct).length;
+        $('liveScorePill').textContent = `${correctCount} / ${answeredCount} corretas`;
+      }
+
+      $('flagBtn').textContent = state.flagged[q.id] ? '⚑ Marcada' : '⚑ Marcar';
+      $('flagBtn').classList.toggle('pill-warn', Boolean(state.flagged[q.id]));
+
+      let badgesHtml = `<span class="pill">Exame ${q.exam} · Pergunta ${q.num}</span>`;
+      if (q.prevWrong) {
+        badgesHtml += `<span class="pill pill-warn">⚠️ Erraste na tentativa anterior</span>`;
+      }
+      if (q.note && isStudyAnswered) {
+        badgesHtml += `<span class="pill pill-info">ℹ️ Gabarito corrigido</span>`;
+      }
+      $('qBadges').innerHTML = badgesHtml;
+
+      $('qText').textContent = q.enun;
+
+      if (q.imgDesc) {
+        $('qImgNote').classList.remove('hidden');
+        $('qImgNote').innerHTML = `<strong>🖼️ Contexto da imagem no PDF:</strong> ${escapeHtml(q.imgDesc)}`;
+      } else {
+        $('qImgNote').classList.add('hidden');
+      }
+
+      const optsBox = $('optionsBox');
+      optsBox.innerHTML = '';
+
+      q.opts.forEach(opt => {
+        const btn = document.createElement('button');
+        btn.className = 'opt-btn';
+        if (state.mode === 'study' && chosen) {
+          btn.disabled = true;
+          if (opt.key === q.correct) btn.classList.add('correct');
+          else if (opt.key === chosen && chosen !== q.correct) btn.classList.add('wrong');
+        } else if (chosen === opt.key) {
+          btn.classList.add('selected');
+        }
+        btn.innerHTML = `<span class="opt-key">${opt.key}</span><span>${escapeHtml(opt.text)}</span>`;
+        btn.addEventListener('click', () => selectOption(opt.key));
+        optsBox.appendChild(btn);
+      });
+
+      if (q.note && isStudyAnswered) {
+        $('qSpecialNote').classList.remove('hidden');
+        $('qSpecialNote').textContent = q.note;
+      } else {
+        $('qSpecialNote').classList.add('hidden');
+      }
+
+      $('prevBtn').disabled = state.index === 0;
+      $('nextBtn').textContent = state.index === total - 1 ? 'Submeter Exame ✓' : 'Seguinte →';
+
+      renderDots();
+    }
+
+    function selectOption(key) {
+      const q = state.questions[state.index];
+      if (state.mode === 'study' && state.answers[q.id]) return;
+      state.answers[q.id] = key;
+      renderQuestion();
+    }
+
+    function renderDots() {
+      const dots = $('qDots');
+      dots.innerHTML = '';
+      state.questions.forEach((q, idx) => {
+        const btn = document.createElement('button');
+        btn.className = 'q-dot';
+        btn.textContent = idx + 1;
+        if (idx === state.index) btn.classList.add('current');
+        if (state.flagged[q.id]) btn.classList.add('flagged');
+        const ans = state.answers[q.id];
+        if (ans) {
+          if (state.mode === 'study') {
+            btn.classList.add(ans === q.correct ? 'ok' : 'bad');
+          } else {
+            btn.classList.add('answered');
+          }
+        }
+        btn.addEventListener('click', () => {
+          state.index = idx;
+          renderQuestion();
+        });
+        dots.appendChild(btn);
+      });
+    }
+
+    function finishQuiz() {
+      const unanswered = state.questions.length - Object.keys(state.answers).length;
+      if (unanswered > 0 && state.timerSeconds > 0) {
+        if (!confirm(`Ainda tens ${unanswered} pergunta(s) por responder. Queres submeter mesmo assim?`)) {
+          return;
+        }
+      }
+      stopTimer();
+      const total = state.questions.length;
+      const correct = state.questions.filter(q => state.answers[q.id] === q.correct).length;
+      const pct = Math.round((correct / total) * 100);
+      const passed = pct >= 70;
+      const elapsedSec = Math.floor((Date.now() - state.startedAt) / 1000);
+      const mins = Math.floor(elapsedSec / 60);
+      const secs = elapsedSec % 60;
+
+      if (state.questions.length >= 30) {
+        saveBestScore(state.deckId, pct);
+      }
+
+      $('quizView').classList.add('hidden');
+      $('resultsView').classList.remove('hidden');
+
+      $('passPill').innerHTML = passed
+        ? '<span class="pill pill-ok" style="font-size:0.95rem; padding:6px 16px;">✅ APROVADO (≥ 70%)</span>'
+        : '<span class="pill pill-bad" style="font-size:0.95rem; padding:6px 16px;">❌ ABAIXO DOS 70% — BORA REVER!</span>';
+
+      $('scoreBig').textContent = `${pct}%`;
+      $('scoreBig').className = `score-big ${passed ? 'pass' : 'fail'}`;
+      $('scoreSub').textContent = `${correct} corretas de ${total} perguntas · Tempo: ${mins}m ${secs}s`;
+
+      const wrongQs = state.questions.filter(q => state.answers[q.id] !== q.correct);
+      if (wrongQs.length > 0) {
+        $('retryWrongBtn').classList.remove('hidden');
+        $('retryWrongBtn').textContent = `🔁 Refazer Só as Erradas (${wrongQs.length})`;
+        $('retryWrongBtn').onclick = () => {
+          const deck = DECKS.find(d => d.id === state.deckId) || { id: 'custom', title: state.deckTitle };
+          startDeck(deck, wrongQs);
+        };
+      } else {
+        $('retryWrongBtn').classList.add('hidden');
+      }
+
+      $('retryDeckBtn').onclick = () => {
+        const deck = DECKS.find(d => d.id === state.deckId);
+        if (deck) startDeck(deck);
+      };
+
+      state.reviewFilter = 'all';
+      updateReviewFilterButtons();
+      renderReviewList();
+    }
+
+    function updateReviewFilterButtons() {
+      document.querySelectorAll('#reviewFilters button').forEach(b => {
+        b.classList.toggle('btn-primary', b.dataset.filter === state.reviewFilter);
+      });
+    }
+
+    function renderReviewList() {
+      const list = $('reviewList');
+      list.innerHTML = '';
+
+      const items = state.questions.filter(q => {
+        if (state.reviewFilter === 'wrong') return state.answers[q.id] !== q.correct;
+        if (state.reviewFilter === 'flagged') return Boolean(state.flagged[q.id]);
+        return true;
+      });
+
+      if (items.length === 0) {
+        list.innerHTML = '<div class="review-card" style="text-align:center; color:var(--muted);">Nenhuma pergunta neste filtro! 🎉</div>';
+        return;
+      }
+
+      items.forEach(q => {
+        const ans = state.answers[q.id];
+        const isOk = ans === q.correct;
+        const card = document.createElement('div');
+        card.className = `review-card ${isOk ? 'is-ok' : 'is-bad'}`;
+        const ansText = ans ? (q.opts.find(o => o.key === ans)?.text || '') : 'Sem resposta';
+        const corrText = q.opts.find(o => o.key === q.correct)?.text || '';
+        card.innerHTML = `
+          <div class="q-badges">
+            <span class="pill">Exame ${q.exam} · P${q.num}</span>
+            <span class="pill ${isOk ? 'pill-ok' : 'pill-bad'}">${isOk ? '✅ Correta' : '❌ Errada'}</span>
+            ${state.flagged[q.id] ? '<span class="pill pill-warn">⚑ Marcada</span>' : ''}
+          </div>
+          <p style="font-weight:600; margin:0 0 10px;">${escapeHtml(q.enun)}</p>
+          ${q.imgDesc ? `<div class="q-img-note" style="margin-bottom:10px;">🖼️ ${escapeHtml(q.imgDesc)}</div>` : ''}
+          <div style="font-size:0.92rem; display:flex; flex-direction:column; gap:4px;">
+            <div><strong>Tua resposta:</strong> ${ans ? `${ans}) ${escapeHtml(ansText)}` : '<em>Não respondida</em>'}</div>
+            ${!isOk ? `<div style="color:var(--ok);"><strong>Resposta correta:</strong> ${q.correct}) ${escapeHtml(corrText)}</div>` : ''}
+          </div>
+          ${q.note ? `<div class="q-special-note">${escapeHtml(q.note)}</div>` : ''}
+        `;
+        list.appendChild(card);
+      });
+    }
+
+    // Event Listeners
+    document.querySelectorAll('#modeSegment button').forEach(btn => {
+      btn.addEventListener('click', () => {
+        state.mode = btn.dataset.mode;
+        document.querySelectorAll('#modeSegment button').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+      });
+    });
+
+    $('prevBtn').addEventListener('click', () => {
+      if (state.index > 0) { state.index--; renderQuestion(); }
+    });
+    $('nextBtn').addEventListener('click', () => {
+      if (state.index < state.questions.length - 1) { state.index++; renderQuestion(); }
+      else finishQuiz();
+    });
+    $('flagBtn').addEventListener('click', () => {
+      const q = state.questions[state.index];
+      state.flagged[q.id] = !state.flagged[q.id];
+      renderQuestion();
+    });
+    $('finishBtn').addEventListener('click', finishQuiz);
+    $('homeBtn').addEventListener('click', () => {
+      if (!$('quizView').classList.contains('hidden')) {
+        if (!confirm('Queres sair deste exame e voltar ao menu?')) return;
+      }
+      renderHome();
+    });
+    $('backMenuBtn').addEventListener('click', renderHome);
+
+    document.querySelectorAll('#reviewFilters button').forEach(b => {
+      b.addEventListener('click', () => {
+        state.reviewFilter = b.dataset.filter;
+        updateReviewFilterButtons();
+        renderReviewList();
+      });
+    });
+
+    $('themeBtn').addEventListener('click', () => {
+      document.body.classList.toggle('light');
+      const isLight = document.body.classList.contains('light');
+      $('themeBtn').textContent = isLight ? '🌙 Tema' : '☀️ Tema';
+      localStorage.setItem('os_sim_theme', isLight ? 'light' : 'dark');
+    });
+
+    if (localStorage.getItem('os_sim_theme') === 'light') {
+      document.body.classList.add('light');
+      $('themeBtn').textContent = '🌙 Tema';
+    }
+
+    document.addEventListener('keydown', e => {
+      if ($('quizView').classList.contains('hidden')) return;
+      const k = e.key.toUpperCase();
+      if (['A', 'B', 'C', 'D'].includes(k)) {
+        const q = state.questions[state.index];
+        if (q.opts.some(o => o.key === k)) selectOption(k);
+      } else if (e.key === 'ArrowRight') {
+        if (state.index < state.questions.length - 1) { state.index++; renderQuestion(); }
+      } else if (e.key === 'ArrowLeft') {
+        if (state.index > 0) { state.index--; renderQuestion(); }
+      }
+    });
+
+    renderHome();
+  </script>
+</body>
+</html>
