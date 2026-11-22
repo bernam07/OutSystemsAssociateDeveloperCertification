@@ -12,7 +12,6 @@ Repositório com os materiais de estudo, simulados, guia de revisão e simulador
 │   ├── Detail sheet.en-US.11.pdf       # Detail sheet oficial do exame Associate Developer (O11)
 │   └── From O11 to OutSystems Developer Cloud Cheatsheet.en-US.ODC.pdf
 └── exames/
-    ├── pdf/                            # 4 simulados originais em PDF (50 perguntas cada)
     ├── extraidos/                      # Extração completa em Markdown das 200 perguntas e respostas
     └── respostas/                      # Fotos das folhas de respostas das tentativas feitas
 ```
